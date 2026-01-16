@@ -71,3 +71,7 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .msg.bad { background: rgba(255,90,95,0.12); border: 1px solid rgba(255,90,95,0.35); }
 .preview { color: var(--fg); line-height: 1.9; }
 .preview p { margin: 0 0 10px; }
+
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.nav a { color: var(--muted); text-decoration: none; font-size: 13px; }
+.nav a:hover { color: var(--fg); text-decoration: underline; }
