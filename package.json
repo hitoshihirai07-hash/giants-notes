@@ -1,0 +1,13 @@
+{
+  "name": "giants-good-notes",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Form-based posting site on Cloudflare Pages + KV",
+  "scripts": {
+    "dev": "wrangler pages dev public --compatibility-date=2026-01-16",
+    "deploy": "wrangler pages deploy public"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

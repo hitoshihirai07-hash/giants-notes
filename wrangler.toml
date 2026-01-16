@@ -1,0 +1,10 @@
+name = "giants-good-notes"
+compatibility_date = "2026-01-16"
+
+# Git連携（Cloudflare Pages）でデプロイする場合は、ダッシュボード側で
+# KVバインディングと環境変数を設定するのが一番ラクです。
+# wrangler CLI を使う場合は、この binding 名を POSTS に合わせてください。
+
+[[kv_namespaces]]
+binding = "POSTS"
+id = "REPLACE_WITH_YOUR_KV_ID"

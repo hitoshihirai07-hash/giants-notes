@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>巨人の良さメモ</title>
+  <meta name="description" content="テレビ・ネット観戦中心。巨人の良さだけを淡々と残すログ。" />
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <header class="wrap">
+    <h1>巨人の良さメモ</h1>
+    <p class="sub">テレビ/ネット観戦。批判じゃなく、良かった点だけ残す。</p>
+
+    <div class="controls">
+      <input id="q" class="input" placeholder="検索（選手名/用語/タイトル）" autocomplete="off" />
+      <select id="tag" class="input">
+        <option value="">タグ：全部</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="state" class="state">読み込み中…</div>
+    <div id="list" class="list" hidden></div>
+  </main>
+
+  <footer class="wrap foot">
+    <small>© Giants Good Notes</small>
+  </footer>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
