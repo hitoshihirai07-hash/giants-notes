@@ -122,7 +122,7 @@ const PublicApp = (() => {
       const p = data.post;
       if (!p) throw new Error("記事が見つかりません");
 
-      document.title = `${p.title} | 巨人の良さメモ`;
+      document.title = `${p.title} | 読売ジャイアンツ 良かったところメモ`;
       titleEl.textContent = p.title;
 
       metaEl.innerHTML = `
