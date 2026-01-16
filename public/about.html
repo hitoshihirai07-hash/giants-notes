@@ -24,13 +24,34 @@
 
     <div class="card" style="margin-top:12px;">
       <h2 class="h2">連絡・メモ提供</h2>
-      <p>「ここ良かった」「こういう視点もある」などのメモは歓迎します。送っていただいた内容は、参考にする場合があります。</p>
-      <p>ただし、<strong>すべてを掲載するとは限りません</strong>。必要に応じて短く整えて掲載することがあります。</p>
-      <p>送付先：</p>
-      <ul>
-        <li>Googleフォーム：<a href="#">【ここにフォームURL（差し替え）】</a></li>
-        <li>X（旧Twitter）：<a href="#">【ここにXのURL（差し替え）】</a></li>
-      </ul>
+      <p>「ここ良かった」「こういう視点もある」などのメモは歓迎します。</p>
+      <p><strong>すべてを掲載するとは限りません</strong>。方向性に合うものがあれば参考にしたり、必要に応じて短く整えて掲載することがあります。</p>
+
+      <div id="contactMsg" class="msg" hidden></div>
+
+      <form id="contactForm" class="form" style="margin-top:12px;">
+        <div class="grid">
+          <div>
+            <label class="label">お名前（任意）</label>
+            <input id="cName" class="input full" placeholder="例：ソラ" autocomplete="off" />
+          </div>
+          <div>
+            <label class="label">連絡先（任意）</label>
+            <input id="cReply" class="input full" placeholder="例：XのID / メール（返信が必要な場合のみ）" autocomplete="off" />
+          </div>
+        </div>
+
+        <label class="label">内容（必須）</label>
+        <textarea id="cBody" class="input full" rows="8" required placeholder="例：○月○日 vs○○ の○回、○○のプレーが良かった…"></textarea>
+
+        <!-- bot対策（人は空のまま） -->
+        <input id="cWebsite" class="input full" style="display:none" tabindex="-1" autocomplete="off" />
+
+        <div class="row">
+          <button class="btn primary" type="submit">送信</button>
+          <button id="cClear" class="btn" type="button">クリア</button>
+        </div>
+      </form>
     </div>
 
     <div class="card" style="margin-top:12px;">
@@ -42,7 +63,7 @@
 
     <div class="card" style="margin-top:12px;">
       <h2 class="h2">プライバシーポリシー</h2>
-      <p>Googleフォーム等を通じて送信された内容（本文、ハンドルネーム等）は、問い合わせ対応および運営改善の目的で利用します。</p>
+      <p>当サイトのお問い合わせフォームを通じて送信された内容（本文、お名前、連絡先など）は、問い合わせ対応および運営改善の目的で利用します。</p>
       <p>取得した情報を第三者へ提供することはありません（法令に基づく場合を除く）。</p>
       <p>必要がなくなった情報は、適切な方法で削除します。</p>
     </div>
@@ -51,5 +72,7 @@
   <footer class="wrap foot">
     <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="./">一覧へ</a></small>
   </footer>
+
+  <script src="./assets/contact.js"></script>
 </body>
 </html>

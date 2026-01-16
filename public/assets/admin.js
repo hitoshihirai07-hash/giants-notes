@@ -123,6 +123,116 @@ const A = (() => {
     }
   }
 
+  function formatJst(iso) {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      // ブラウザのローカル時間（日本ならJST）で表示
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return iso;
+    }
+  }
+
+  async function loadInbox() {
+    const inboxEl = $("inbox");
+    if (!inboxEl) return; // 古いadmin.html対策
+
+    const token = $("token")?.value?.trim() || "";
+    if (!token) {
+      inboxEl.innerHTML = `<div class="card">トークンを入力すると表示できます</div>`;
+      return;
+    }
+
+    inboxEl.innerHTML = `<div class="card">読み込み中...</div>`;
+
+    try {
+      const res = await fetch("./api/inbox?limit=50", {
+        headers: {
+          "authorization": `Bearer ${token}`
+        }
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
+
+      const msgs = Array.isArray(json?.messages) ? json.messages : [];
+      if (!msgs.length) {
+        inboxEl.innerHTML = `<div class="card">まだ届いていません</div>`;
+        return;
+      }
+
+      inboxEl.innerHTML = "";
+      for (const m of msgs) {
+        const id = esc(m?.id || "");
+        const createdAt = esc(formatJst(m?.createdAt || ""));
+        const name = esc(m?.name || "");
+        const reply = esc(m?.reply || "");
+
+        const body = String(m?.body || "");
+        const ps = paragraphs(body).map(p => `<p>${esc(p)}</p>`).join("");
+
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <div class="meta">
+            <span>${createdAt}</span>
+            ${name ? `<span>・ ${name}</span>` : ""}
+            ${reply ? `<span>・ ${reply}</span>` : ""}
+          </div>
+          <div style="margin-top:10px;">${ps}</div>
+          <div class="row" style="margin-top:10px; gap:8px;">
+            <button class="btn ghost" data-del="${id}">削除</button>
+            <button class="btn" data-copy="${id}">本文コピー</button>
+          </div>
+        `;
+        inboxEl.appendChild(div);
+      }
+
+      // handlers
+      inboxEl.querySelectorAll("button[data-copy]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const targetId = btn.getAttribute("data-copy");
+          const msg = msgs.find(x => String(x.id) === String(targetId));
+          if (!msg) return;
+          const text = String(msg.body || "");
+          try {
+            await navigator.clipboard.writeText(text);
+            showMsg("ok", "コピーしました");
+          } catch {
+            showMsg("bad", "コピーに失敗しました（ブラウザの権限を確認）");
+          }
+        });
+      });
+
+      inboxEl.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const targetId = btn.getAttribute("data-del");
+          if (!targetId) return;
+          try {
+            const del = await fetch("./api/inbox-delete", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({ id: targetId })
+            });
+            const j = await del.json().catch(() => ({}));
+            if (!del.ok) throw new Error(j?.error || `HTTP ${del.status}`);
+            showMsg("ok", "削除しました");
+            loadInbox();
+          } catch (e) {
+            showMsg("bad", `削除失敗: ${e.message}`);
+          }
+        });
+      });
+    } catch (e) {
+      inboxEl.innerHTML = `<div class="card">読み込み失敗: ${esc(e.message)}</div>`;
+    }
+  }
+
   function init() {
     loadToken();
     $("date").value = nowDate();
@@ -141,6 +251,9 @@ const A = (() => {
     });
 
     renderPreview();
+    // inbox
+    $("inboxReload")?.addEventListener("click", loadInbox);
+    loadInbox();
   }
 
   return { init };
