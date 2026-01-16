@@ -16,14 +16,29 @@ async function getIndex(kv) {
   }
 }
 
-export async function onRequest(context) {
-  const kv = context.env.POSTS;
-  if (!kv) return json({ error: "KV binding 'POSTS' が設定されていません" }, { status: 500 });
-
-  if (context.request.method !== "GET") {
-    return json({ error: "Method not allowed" }, { status: 405 });
+function getKvOrThrow(env) {
+  const kv = env?.POSTS;
+  // If the user mistakenly set POSTS as a plain environment variable (string),
+  // kv.get will not exist and the function will crash. Detect that case and
+  // return a clear JSON error instead.
+  if (!kv) throw new Error("KV binding 'POSTS' が設定されていません（Pages > Settings > Functions > KV namespace bindings で追加）");
+  if (typeof kv.get !== "function" || typeof kv.put !== "function") {
+    throw new Error("'POSTS' はKVバインディングではありません。環境変数ではなく KV namespace binding として設定してください");
   }
+  return kv;
+}
 
-  const posts = await getIndex(kv);
-  return json({ posts });
+export async function onRequest(context) {
+  try {
+    const kv = getKvOrThrow(context.env);
+
+    if (context.request.method !== "GET") {
+      return json({ error: "Method not allowed" }, { status: 405 });
+    }
+
+    const posts = await getIndex(kv);
+    return json({ posts });
+  } catch (e) {
+    return json({ error: String(e?.message || e) }, { status: 500 });
+  }
 }

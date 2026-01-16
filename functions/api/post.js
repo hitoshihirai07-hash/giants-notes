@@ -46,9 +46,22 @@ function normalizeTags(tags) {
     .slice(0, 20);
 }
 
+function getKvOrThrow(env) {
+  const kv = env?.POSTS;
+  if (!kv) throw new Error("KV binding 'POSTS' が設定されていません（Pages > Settings > Functions > KV namespace bindings で追加）");
+  if (typeof kv.get !== "function" || typeof kv.put !== "function") {
+    throw new Error("'POSTS' はKVバインディングではありません。環境変数ではなく KV namespace binding として設定してください");
+  }
+  return kv;
+}
+
 export async function onRequest(context) {
-  const kv = context.env.POSTS;
-  if (!kv) return json({ error: "KV binding 'POSTS' が設定されていません" }, { status: 500 });
+  let kv;
+  try {
+    kv = getKvOrThrow(context.env);
+  } catch (e) {
+    return json({ error: String(e?.message || e) }, { status: 500 });
+  }
 
   const req = context.request;
   const url = new URL(req.url);

@@ -28,6 +28,10 @@ Pages → プロジェクト → Settings → Functions → **KV namespace bindi
 - Variable name: `POSTS`
 - KV namespace: さっき作った `GIANTS_NOTES_KV`
 
+#### よくあるミス
+- `POSTS` を **Environment variables** 側に作ってしまう → KVが使えず `/api/posts` が 500 になります
+- Production/Preview の片方だけ設定している → もう片方の環境では動きません
+
 ### 4) 管理トークン（必須）を設定
 Pages → Settings → Environment variables → **Add variable**
 
