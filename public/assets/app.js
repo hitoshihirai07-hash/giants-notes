@@ -151,8 +151,12 @@ const PublicApp = (() => {
 
   return {
     init() {
-      const path = location.pathname.split("/").pop();
-      if (path === "post.html") return renderPost();
+      // Cloudflare Pages の「クリーンURL（.html省略）」で
+      // /post.html が /post にリダイレクトされる場合がある。
+      // そのときも個別記事として動くように両方対応。
+      const p = location.pathname.replace(/\/+$/, "");
+      const last = p.split("/").pop();
+      if (last === "post" || last === "post.html") return renderPost();
       return renderIndex();
     }
   };
