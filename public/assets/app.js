@@ -40,25 +40,32 @@ const PublicApp = (() => {
     const qEl = Util.qs("q");
     const tagEl = Util.qs("tag");
 
+    // ページ側のHTMLを後から手でいじって
+    // 検索欄・タグ欄を消しても落ちないようにする。
+    const hasSearch = !!qEl;
+    const hasTag = !!tagEl;
+
     try {
       const data = await apiGet("./api/posts");
       const posts = (Array.isArray(data.posts) ? data.posts : [])
         .slice()
         .sort((a, b) => String(b?.date || "").localeCompare(String(a?.date || "")));
 
-      // build tags
-      const tagSet = new Set();
-      for (const p of posts) for (const t of (p.tags || [])) tagSet.add(t);
-      [...tagSet].sort().forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t;
-        opt.textContent = t;
-        tagEl.appendChild(opt);
-      });
+      // build tags (タグ欄がある時だけ)
+      if (hasTag) {
+        const tagSet = new Set();
+        for (const p of posts) for (const t of (p.tags || [])) tagSet.add(t);
+        [...tagSet].sort().forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t;
+          opt.textContent = t;
+          tagEl.appendChild(opt);
+        });
+      }
 
       function render() {
-        const q = Util.normalize(qEl.value);
-        const t = tagEl.value;
+        const q = hasSearch ? Util.normalize(qEl.value) : "";
+        const t = hasTag ? tagEl.value : "";
 
         const filtered = posts.filter(p => {
           const hay = Util.normalize([
@@ -92,8 +99,8 @@ const PublicApp = (() => {
         }
       }
 
-      qEl.addEventListener("input", render);
-      tagEl.addEventListener("change", render);
+      if (hasSearch) qEl.addEventListener("input", render);
+      if (hasTag) tagEl.addEventListener("change", render);
 
       stateEl.hidden = true;
       listEl.hidden = false;
