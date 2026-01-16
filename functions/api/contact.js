@@ -14,6 +14,64 @@ function getKvOrThrow(env) {
   return kv;
 }
 
+function getClientIp(req) {
+  const h = req.headers;
+  return (
+    h.get("cf-connecting-ip") ||
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+async function checkRateLimit(kv, ip) {
+  // ゆるいレート制限: 同一IPからの連投を抑制
+  const key = `rl:contact:${ip}`;
+  const now = Date.now();
+  const windowMs = 60_000; // 1分
+  const max = 3; // 1分に3回まで
+
+  let state = { ts: now, count: 0 };
+  const raw = await kv.get(key);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (typeof parsed?.ts === "number" && typeof parsed?.count === "number") {
+        state = parsed;
+      }
+    } catch {}
+  }
+
+  if (now - state.ts > windowMs) {
+    state = { ts: now, count: 0 };
+  }
+
+  state.count += 1;
+
+  // 保存（少し長めのTTLで自然消滅）
+  await kv.put(key, JSON.stringify(state), { expirationTtl: 90 });
+
+  if (state.count > max) {
+    return { ok: false, retryAfterSec: 60 };
+  }
+  return { ok: true };
+}
+
+async function verifyTurnstile(secret, token, ip) {
+  // Cloudflare Turnstile siteverify
+  const form = new FormData();
+  form.append("secret", secret);
+  form.append("response", token);
+  if (ip && ip !== "unknown") form.append("remoteip", ip);
+
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body: form
+  });
+  const json = await res.json().catch(() => ({}));
+  return Boolean(json?.success);
+}
+
 function randomId() {
   const a = new Uint32Array(2);
   crypto.getRandomValues(a);
@@ -43,6 +101,15 @@ export async function onRequest(context) {
 
     const kv = getKvOrThrow(context.env);
 
+    const ip = getClientIp(context.request);
+    const rl = await checkRateLimit(kv, ip);
+    if (!rl.ok) {
+      return json(
+        { error: "送信が多すぎます。少し時間をおいてください" },
+        { status: 429, headers: { "retry-after": String(rl.retryAfterSec || 60) } }
+      );
+    }
+
     let body;
     try {
       body = await context.request.json();
@@ -55,6 +122,20 @@ export async function onRequest(context) {
     if (website) {
       // bot扱い：成功扱いで返して終了（スパムを溜めない）
       return json({ ok: true });
+    }
+
+    // Turnstile（必須）
+    const tsSecret = String(context.env?.TURNSTILE_SECRET || "").trim();
+    const tsToken = String(body.turnstile || "").trim();
+    if (!tsSecret) {
+      return json({ error: "Turnstile設定が未完了です（管理者側でsecretを設定してください）" }, { status: 503 });
+    }
+    if (!tsToken) {
+      return json({ error: "認証が必要です" }, { status: 403 });
+    }
+    const okTs = await verifyTurnstile(tsSecret, tsToken, ip);
+    if (!okTs) {
+      return json({ error: "認証に失敗しました（再度お試しください）" }, { status: 403 });
     }
 
     const name = String(body.name || "").trim().slice(0, 80);

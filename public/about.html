@@ -6,6 +6,8 @@
   <title>このサイトについて | 読売ジャイアンツ 良かったところメモ</title>
   <meta name="description" content="読売ジャイアンツ 良かったところメモ：免責事項、プライバシーポリシー、連絡先" />
   <link rel="stylesheet" href="./assets/style.css" />
+  <!-- Turnstile（スパム対策）: render=explicit でJS側が描画します -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
 </head>
 <body>
   <header class="wrap">
@@ -43,6 +45,11 @@
 
         <label class="label">内容（必須）</label>
         <textarea id="cBody" class="input full" rows="8" required></textarea>
+
+        <!-- Turnstile（スパム対策） -->
+        <div id="turnstileWrap" style="margin:12px 0 6px;">
+          <div id="turnstile"></div>
+        </div>
 
         <!-- bot対策（人は空のまま） -->
         <input id="cWebsite" class="input full" style="display:none" tabindex="-1" autocomplete="off" />

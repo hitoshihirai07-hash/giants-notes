@@ -49,10 +49,33 @@ Pages → Settings → Environment variables → **Add variable**
 
 ---
 
+## お問い合わせフォームのスパム対策（Turnstile）
+
+### 1) Turnstile を作成
+Cloudflare ダッシュボード → **Turnstile** → **Add widget**
+
+- **ドメイン**: あなたの Pages ドメイン（例: `giants-notes.pages.dev`）
+- **ウィジェットモード**: 迷ったら "Managed" のままでOK
+
+作成すると **Site key** と **Secret key** が表示されます。
+
+### 2) Pages の環境変数を追加
+Pages → Settings → Environment variables → Add variable
+
+- Name: `TURNSTILE_SITEKEY`（Site key / 公開OK）
+- Name: `TURNSTILE_SECRET`（Secret key / **Secret推奨**）
+
+※ Production と Preview の両方に入れると、プレビューでもフォームが動きます。
+
+---
+
 ## セキュリティ注意
 - `/admin.html` には `noindex` を入れてますが、URLが漏れたら誰でも開けます。
 - 投稿APIは `ADMIN_TOKEN` がないと通りません。
 - トークンは **推測されない長さ** にして、使い回さないのが安全。
+
+### レート制限
+お問い合わせフォームは **同一IPから1分に3回まで** に制限しています（スパム対策）。
 
 ---
 
