@@ -96,7 +96,7 @@
 
   // Turnstile onload callback (called by script tag)
   window.onTurnstileLoad = async function () {
-    const host = $("turnstile");
+    const host = $("cfTurnstile");
     if (!host) {
       // フォーム側にTurnstile枠が無い場合は無効化
       tsEnabled = false;
