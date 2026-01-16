@@ -31,7 +31,7 @@
         <div class="grid">
           <div>
             <label class="label">タイトル（必須）</label>
-            <input id="title" class="input full" required placeholder="例：今週の良かったところ3つ" />
+            <input id="title" class="input full" required />
           </div>
           <div>
             <label class="label">日付（必須）</label>
@@ -40,13 +40,14 @@
         </div>
 
         <label class="label">情報（任意）</label>
-        <input id="info" class="input full" placeholder="例：vs○○ / 3-2 / 8回が良かった" />
+        <input id="info" class="input full" />
 
         <label class="label">タグ（任意・カンマ区切り）</label>
-        <input id="tags" class="input full" placeholder="例：試合, ポジティブ, 岡本" />
+        <input id="tags" class="input full" />
 
         <label class="label">本文（必須）</label>
-        <textarea id="body" class="input full" rows="10" required placeholder="空行で段落区切り。\n\n例：\n1つ目：〜\n\n2つ目：〜"></textarea>
+        <textarea id="body" class="input full" rows="10" required></textarea>
+        <p class="hint" style="margin-top:8px;">※空行で段落区切り</p>
 
         <div class="row">
           <button id="submit" class="btn primary" type="submit">投稿</button>

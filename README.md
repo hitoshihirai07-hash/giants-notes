@@ -14,8 +14,6 @@
 ### 1) Cloudflare KV を作成
 Cloudflare ダッシュボード → **Workers & Pages** → **KV** → **Create a namespace**
 
-例: `GIANTS_NOTES_KV`
-
 ### 2) Cloudflare Pages にデプロイ
 このフォルダ一式を GitHub に上げて、Cloudflare Pages で **Connect to Git** でデプロイ。
 
@@ -37,7 +35,7 @@ Pages → プロジェクト → Settings → Functions → **KV namespace bindi
 Pages → Settings → Environment variables → **Add variable**
 
 - Name: `ADMIN_TOKEN`
-- Value: 自分だけが知ってる長めの文字列（例: 32文字以上）
+- Value: 自分だけが知ってる長めの文字列（32文字以上を推奨）
 - Type: **Secret** を推奨
 
 ※ Production と Preview の両方に入れると、プレビュー環境でも投稿できます。
