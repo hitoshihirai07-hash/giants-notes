@@ -308,6 +308,42 @@ async function loadIndexNowLog() {
     el.innerHTML = `<div class="card">読み込み失敗: ${esc(e?.message || e)}</div>`;
   }
 }
+async function maybeBackfillIndexNow() {
+  try {
+    const token = $("token")?.value?.trim() || "";
+    if (!token) return;
+
+    // If there is already at least one log entry, do nothing.
+    const chk = await fetch("./api/indexnow-log?limit=1", {
+      headers: { "authorization": `Bearer ${token}` }
+    });
+    const chkJson = await chk.json().catch(() => ({}));
+    if (!chk.ok) return;
+    const logs = Array.isArray(chkJson?.logs) ? chkJson.logs : [];
+    if (logs.length) return;
+
+    // Avoid repeated attempts per device if something is wrong.
+    if (localStorage.getItem("IX_BACKFILL_TRIED") === "1") return;
+    localStorage.setItem("IX_BACKFILL_TRIED", "1");
+
+    const bf = await fetch("./api/indexnow-backfill?limit=500", {
+      method: "POST",
+      headers: { "authorization": `Bearer ${token}` }
+    });
+    const bfJson = await bf.json().catch(() => ({}));
+
+    // Silent on success; show message only on failure.
+    if (!bf.ok || bfJson?.ok === false) {
+      const reason = bfJson?.error || bfJson?.body || bfJson?.reason || `HTTP ${bf.status}`;
+      showMsg("bad", `IndexNow 初回送信に失敗: ${reason}`);
+    }
+
+    await loadIndexNowLog();
+  } catch {
+    // ignore
+  }
+}
+
 function init() {
     loadToken();
     $("date").value = nowDate();
@@ -333,6 +369,7 @@ function init() {
     // indexnow log
     $("indexNowReload")?.addEventListener("click", loadIndexNowLog);
     loadIndexNowLog();
+    maybeBackfillIndexNow();
   }
 
   return { init };
