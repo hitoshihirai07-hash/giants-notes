@@ -59,6 +59,25 @@ async function submitIndexNow({ origin, host, key, keyLocation, urlList }) {
   return { ok: false, status: res.status, body: text.slice(0, 200) };
 }
 
+async function appendIndexNowLog(kv, entry) {
+  try {
+    const key = "indexnow:log";
+    const raw = await kv.get(key);
+    let arr = [];
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) arr = parsed;
+      } catch {}
+    }
+    arr.unshift(entry);
+    if (arr.length > 100) arr = arr.slice(0, 100);
+    await kv.put(key, JSON.stringify(arr));
+  } catch {
+    // ignore
+  }
+}
+
 function normalizeTags(tags) {
   if (Array.isArray(tags)) {
     return tags.map(t => String(t).trim()).filter(Boolean).slice(0, 20);
@@ -161,15 +180,16 @@ export async function onRequest(context) {
     await setIndex(kv, next);
 
     // IndexNow: 投稿したページ＋トップ＋サイトマップを通知
+    let urlList = [];
     let indexNow = { ok: false, skipped: true };
     try {
       const key = String(context.env?.INDEXNOW_KEY || "").trim();
       if (key) {
         const origin = url.origin;
         const host = url.host;
-        const keyLocation = `${origin}/indexnow-key.txt`;
+        const keyLocation = `${origin}/${key}.txt`;
         const postUrl = `${origin}/post?id=${encodeURIComponent(id)}`;
-        const urlList = [postUrl, `${origin}/`, `${origin}/sitemap.xml`];
+        urlList = [postUrl, `${origin}/`, `${origin}/sitemap.xml`];
 
         const r = await submitIndexNow({ origin, host, key, keyLocation, urlList });
         indexNow = { ...r, skipped: false };
@@ -178,7 +198,20 @@ export async function onRequest(context) {
       indexNow = { ok: false, skipped: false, error: String(e?.message || e) };
     }
 
+    // IndexNow log（管理画面で確認できるように保存）
+    await appendIndexNowLog(kv, {
+      ts: now,
+      postId: id,
+      ok: !!indexNow?.ok,
+      skipped: !!indexNow?.skipped,
+      status: indexNow?.status ?? null,
+      error: indexNow?.error ?? null,
+      body: indexNow?.body ?? null,
+      urls: Array.isArray(urlList) ? urlList : []
+    });
+
     return json({ ok: true, id, url: `/post?id=${encodeURIComponent(id)}`, indexNow });
+
   }
 
   return json({ error: "Method not allowed" }, { status: 405 });

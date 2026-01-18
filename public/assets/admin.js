@@ -112,8 +112,24 @@ const A = (() => {
       }
 
       const url = json?.url ? json.url : "";
-      const extra = url ? `<div style="margin-top:8px;"><a href="${esc(url)}">公開ページを開く</a></div>` : "";
-      showMsg("ok", "投稿しました", extra);
+const openHtml = url ? `<div style="margin-top:8px;"><a href="${esc(url)}">公開ページを開く</a></div>` : "";
+
+const ix = json?.indexNow;
+let ixHtml = "";
+if (ix) {
+  if (ix.skipped) {
+    ixHtml = `<div class="hint" style="margin-top:8px;">IndexNow: スキップ（キー未設定）</div>`;
+  } else if (ix.ok) {
+    ixHtml = `<div class="hint" style="margin-top:8px;">IndexNow: 送信OK（HTTP ${esc(String(ix.status || ""))}）</div>`;
+  } else {
+    const reason = esc(String(ix.error || ix.body || ""));
+    ixHtml = `<div class="hint" style="margin-top:8px;">IndexNow: 送信NG（HTTP ${esc(String(ix.status || ""))}）${reason ? `：${reason}` : ""}</div>`;
+  }
+}
+
+const extra = `${openHtml}${ixHtml}`;
+showMsg("ok", "投稿しました", extra);
+      loadIndexNowLog();
 
       // clear body for next post (keep date/tags)
       $("body").value = "";
@@ -233,7 +249,66 @@ const A = (() => {
     }
   }
 
-  function init() {
+  
+
+async function loadIndexNowLog() {
+  const el = $("indexNowLog");
+  if (!el) return;
+
+  const token = $("token")?.value?.trim() || "";
+  if (!token) {
+    el.innerHTML = `<div class="card">トークンを入力すると表示できます</div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="card">読み込み中...</div>`;
+
+  try {
+    const res = await fetch("./api/indexnow-log?limit=50", {
+      headers: { "authorization": `Bearer ${token}` }
+    });
+
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
+
+    const logs = Array.isArray(json?.logs) ? json.logs : [];
+    if (!logs.length) {
+      el.innerHTML = `<div class="card">まだありません</div>`;
+      return;
+    }
+
+    el.innerHTML = "";
+    for (const r of logs) {
+      const ts = esc(formatJst(r?.ts || ""));
+      const postId = esc(r?.postId || "");
+      const ok = r?.skipped ? "SKIP" : (r?.ok ? "OK" : "NG");
+      const status = r?.status != null ? esc(String(r.status)) : "";
+      const err = esc(r?.error || "");
+      const body = esc(r?.body || "");
+      const urls = Array.isArray(r?.urls) ? r.urls : [];
+
+      const urlHtml = urls.slice(0, 3).map(u => `<div class="mono" style="font-size:12px; opacity:.9;">${esc(u)}</div>`).join("");
+
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <div class="meta">
+          <span>${ts}</span>
+          <span>・ ${ok}</span>
+          ${status ? `<span>・ ${status}</span>` : ""}
+          ${postId ? `<span>・ ${postId}</span>` : ""}
+        </div>
+        ${err ? `<div class="hint" style="margin-top:6px;">${err}</div>` : ""}
+        ${body ? `<div class="hint" style="margin-top:6px;">${body}</div>` : ""}
+        <div style="margin-top:8px;">${urlHtml}</div>
+      `;
+      el.appendChild(div);
+    }
+  } catch (e) {
+    el.innerHTML = `<div class="card">読み込み失敗: ${esc(e?.message || e)}</div>`;
+  }
+}
+function init() {
     loadToken();
     $("date").value = nowDate();
 
@@ -254,6 +329,10 @@ const A = (() => {
     // inbox
     $("inboxReload")?.addEventListener("click", loadInbox);
     loadInbox();
+
+    // indexnow log
+    $("indexNowReload")?.addEventListener("click", loadIndexNowLog);
+    loadIndexNowLog();
   }
 
   return { init };
