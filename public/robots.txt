@@ -2,3 +2,6 @@ User-agent: *
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /api/
+
+# サイトマップ（必要なら自分のドメインに合わせて書き換え）
+Sitemap: https://giants-notes.pages.dev/sitemap.xml

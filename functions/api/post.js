@@ -35,6 +35,30 @@ async function setIndex(kv, index) {
   await kv.put("posts:index", JSON.stringify(index));
 }
 
+async function submitIndexNow({ origin, host, key, keyLocation, urlList }) {
+  // IndexNow（失敗しても投稿は成功させる）
+  const endpoint = "https://api.indexnow.org/indexnow";
+  const payload = {
+    host,
+    key,
+    keyLocation,
+    urlList
+  };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "content-type": "application/json; charset=utf-8" },
+    body: JSON.stringify(payload)
+  });
+
+  // 200: OK / 202: Accepted（key validation pending）
+  if (res.status === 200 || res.status === 202) {
+    return { ok: true, status: res.status };
+  }
+  const text = await res.text().catch(() => "");
+  return { ok: false, status: res.status, body: text.slice(0, 200) };
+}
+
 function normalizeTags(tags) {
   if (Array.isArray(tags)) {
     return tags.map(t => String(t).trim()).filter(Boolean).slice(0, 20);
@@ -136,7 +160,25 @@ export async function onRequest(context) {
     const next = [meta, ...index.filter(x => x?.id !== id)].slice(0, 5000);
     await setIndex(kv, next);
 
-    return json({ ok: true, id, url: `/post.html?id=${encodeURIComponent(id)}` });
+    // IndexNow: 投稿したページ＋トップ＋サイトマップを通知
+    let indexNow = { ok: false, skipped: true };
+    try {
+      const key = String(context.env?.INDEXNOW_KEY || "").trim();
+      if (key) {
+        const origin = url.origin;
+        const host = url.host;
+        const keyLocation = `${origin}/indexnow-key.txt`;
+        const postUrl = `${origin}/post?id=${encodeURIComponent(id)}`;
+        const urlList = [postUrl, `${origin}/`, `${origin}/sitemap.xml`];
+
+        const r = await submitIndexNow({ origin, host, key, keyLocation, urlList });
+        indexNow = { ...r, skipped: false };
+      }
+    } catch (e) {
+      indexNow = { ok: false, skipped: false, error: String(e?.message || e) };
+    }
+
+    return json({ ok: true, id, url: `/post?id=${encodeURIComponent(id)}`, indexNow });
   }
 
   return json({ error: "Method not allowed" }, { status: 405 });

@@ -88,7 +88,7 @@ const PublicApp = (() => {
           const div = document.createElement("div");
           div.className = "card";
           div.innerHTML = `
-            <a href="./post.html?id=${encodeURIComponent(p.id)}"><strong>${Util.esc(p.title)}</strong></a>
+            <a href="./post?id=${encodeURIComponent(p.id)}"><strong>${Util.esc(p.title)}</strong></a>
             <div class="meta">
               <span>${Util.esc(p.date || "")}</span>
               ${p.info ? `<span>・ ${Util.esc(p.info)}</span>` : ""}

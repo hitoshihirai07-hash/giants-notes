@@ -2,9 +2,10 @@
 
 「タイトル / 情報 / タグ / 本文」をフォーム入力して **投稿ボタンを押すだけ** で公開できる、最小構成の静的サイト + Cloudflare Pages Functions です。
 
-- 公開ページ: `/`（一覧） と `/post.html?id=...`（個別）
-- 管理ページ: `/admin.html`（フォーム投稿 + 受信箱）
-- このサイトについて: `/about.html`（免責・プライバシー・お問い合わせフォーム）
+- 公開ページ: `/`（一覧） と `/post?id=...`（個別）
+- 管理ページ: `/admin`（フォーム投稿 + 受信箱）
+- このサイトについて: `/about`（免責・プライバシー・お問い合わせフォーム）
+- サイトマップ: `/sitemap.xml`（自動生成）
 - 保存先: Cloudflare KV（1回セットアップしたら、以後はブラウザから投稿するだけ）
 
 ---
@@ -42,7 +43,7 @@ Pages → Settings → Environment variables → **Add variable**
 
 ### 5) 投稿する
 デプロイ後に
-- `https://<your-site>.pages.dev/admin.html` を開く
+- `https://<your-site>.pages.dev/admin` を開く
 - トークン入力 → タイトル/情報/タグ/本文 → 投稿
 
 投稿後に返ってきた URL を開けば公開されてます。
@@ -69,8 +70,34 @@ Pages → Settings → Environment variables → Add variable
 
 ---
 
+## 検索に強くする（sitemap / canonical / IndexNow）
+
+### sitemap.xml
+- `/sitemap.xml` は **KVの一覧から自動生成** します。
+- `public/robots.txt` に Sitemap を追記しています。
+
+※独自ドメインにしたら、`public/robots.txt` の Sitemap 行はドメインに合わせて書き換えてください。
+
+### canonical
+- `public/assets/seo.js` が canonical を自動で統一します（`/post` と `/post.html` のような重複を避けます）。
+
+### IndexNow（任意）
+投稿した直後に、Bing などへ「このURLが更新されたよ」を通知できます（IndexNow）。
+
+1) Pages の環境変数を追加
+- Name: `INDEXNOW_KEY`（Bing Webmaster Tools で生成したキー、または自分で作ったキー）
+
+2) 確認
+- `https://<your-site>.pages.dev/indexnow-key.txt` を開くと、キーがそのまま表示されます。
+
+3) 動作
+- 新規投稿すると、サーバー側で `api.indexnow.org` に通知します。
+  - 通知対象: `投稿ページ / トップ / sitemap.xml`
+
+※ `INDEXNOW_KEY` を入れていない場合はスキップします（投稿自体は普通に成功します）。
+
 ## セキュリティ注意
-- `/admin.html` には `noindex` を入れてますが、URLが漏れたら誰でも開けます。
+- `/admin` には `noindex` を入れてますが、URLが漏れたら誰でも開けます。
 - 投稿APIは `ADMIN_TOKEN` がないと通りません。
 - トークンは **推測されない長さ** にして、使い回さないのが安全。
 
