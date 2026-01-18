@@ -15,8 +15,15 @@ function getAuthToken(req) {
 }
 
 function getKvOrThrow(env) {
-  const kv = env?.GIANTS_KV || env?.KV || env?.DB;
-  if (!kv) throw new Error("KV バインドが見つかりません（GIANTS_KV を設定してください）");
+  // This project uses a single KV binding named 'POSTS' for posts, inbox,
+  // and IndexNow logs. Keep it consistent with other endpoints.
+  const kv = env?.POSTS;
+  if (!kv) {
+    throw new Error("KV binding 'POSTS' が設定されていません（Pages > Settings > Functions > KV namespace bindings で追加）");
+  }
+  if (typeof kv.get !== "function" || typeof kv.put !== "function") {
+    throw new Error("'POSTS' はKVバインディングではありません。環境変数ではなく KV namespace binding として設定してください");
+  }
   return kv;
 }
 
