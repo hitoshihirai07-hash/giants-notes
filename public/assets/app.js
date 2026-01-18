@@ -23,6 +23,55 @@ const Util = (() => {
   return { esc, normalize, qs, splitTags, paragraphs };
 })();
 
+const SITE_NAME = "読売ジャイアンツ 良かった点メモ";
+
+function ensureMetaName(name) {
+  let el = document.querySelector(`meta[name="${name}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("name", name);
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+function ensureMetaProperty(prop) {
+  let el = document.querySelector(`meta[property="${prop}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("property", prop);
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+function setJsonLd(id, obj) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("script");
+    el.type = "application/ld+json";
+    el.id = id;
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(obj);
+}
+
+function toIsoDate(dateStr) {
+  const s = String(dateStr || "").trim();
+  // 期待: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return "";
+}
+
+function shortDescFromBody(body) {
+  const ps = Util.paragraphs(body);
+  const first = ps[0] || "";
+  // だいたい検索結果向けの長さ
+  const trimmed = first.replace(/\s+/g, " ").trim();
+  if (trimmed.length <= 140) return trimmed;
+  return trimmed.slice(0, 140).trimEnd() + "…";
+}
+
 async function apiGet(url) {
   const res = await fetch(url, { cache: "no-store" });
   const json = await res.json().catch(() => ({}));
@@ -129,7 +178,88 @@ const PublicApp = (() => {
       const p = data.post;
       if (!p) throw new Error("記事が見つかりません");
 
-      document.title = `${p.title} | 読売ジャイアンツ 良かったところメモ`;
+      // --- タイトル / メタ（検索結果・SNS向け） ---
+      document.title = `${p.title} | ${SITE_NAME}`;
+      const origin = location.origin;
+      const pageUrl = (() => {
+        try {
+          const u = new URL(location.href);
+          // /post.html -> /post へ寄せる（canonicalと揃える）
+          u.pathname = u.pathname.replace(/\/post\.html$/, "/post");
+          return u.toString();
+        } catch {
+          return location.href;
+        }
+      })();
+
+      const desc = shortDescFromBody(p.body) || "読売ジャイアンツの良かった点を短く残すメモ。";
+
+      // description
+      ensureMetaName("description").setAttribute("content", desc);
+
+      // Open Graph
+      ensureMetaProperty("og:title").setAttribute("content", `${p.title} | ${SITE_NAME}`);
+      ensureMetaProperty("og:description").setAttribute("content", desc);
+      ensureMetaProperty("og:type").setAttribute("content", "article");
+      ensureMetaProperty("og:site_name").setAttribute("content", SITE_NAME);
+      ensureMetaProperty("og:image").setAttribute("content", `${origin}/android-chrome-512x512.png`);
+      ensureMetaProperty("og:url").setAttribute("content", pageUrl);
+
+      // Twitter（最低限）
+      ensureMetaName("twitter:card").setAttribute("content", "summary");
+      ensureMetaName("twitter:title").setAttribute("content", `${p.title} | ${SITE_NAME}`);
+      ensureMetaName("twitter:description").setAttribute("content", desc);
+
+      // --- 構造化データ（サイト名/パンくず/記事） ---
+      const iso = toIsoDate(p.date);
+      const graph = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": `${origin}/#website`,
+            "name": SITE_NAME,
+            "url": `${origin}/`,
+            "inLanguage": "ja-JP"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "ホーム",
+                "item": `${origin}/`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": p.title,
+                "item": pageUrl
+              }
+            ]
+          },
+          {
+            "@type": "Article",
+            "headline": p.title,
+            "description": desc,
+            "mainEntityOfPage": { "@type": "WebPage", "@id": pageUrl },
+            "datePublished": iso || undefined,
+            "dateModified": iso || undefined,
+            "inLanguage": "ja-JP",
+            "keywords": Array.isArray(p.tags) ? p.tags.join(", ") : "",
+            "author": { "@type": "Person", "name": "管理者" },
+            "publisher": {
+              "@type": "Organization",
+              "name": SITE_NAME,
+              "logo": { "@type": "ImageObject", "url": `${origin}/android-chrome-512x512.png` }
+            }
+          }
+        ]
+      };
+      // undefined を落とす
+      graph["@graph"][2] = JSON.parse(JSON.stringify(graph["@graph"][2]));
+      setJsonLd("ldjson-article", graph);
       titleEl.textContent = p.title;
 
       metaEl.innerHTML = `
