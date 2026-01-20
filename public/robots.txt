@@ -5,3 +5,7 @@ Disallow: /api/
 
 # サイトマップ（必要なら自分のドメインに合わせて書き換え）
 Sitemap: https://giants-notes.pages.dev/sitemap.xml
+Disallow: /admin-open
+Disallow: /admin-open.html
+Disallow: /data/batters_open.csv
+Disallow: /data/pitchers_open.csv

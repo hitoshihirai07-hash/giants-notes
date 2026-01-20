@@ -75,3 +75,15 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .nav a { color: var(--muted); text-decoration: none; font-size: 13px; }
 .nav a:hover { color: var(--fg); text-decoration: underline; }
+
+/* stats */
+.tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.tabbtn{ padding:8px 10px; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:999px; cursor:pointer; font-size:13px; }
+.tabbtn:hover{ border-color:#888; }
+.tabbtn.active{ border-color:#888; font-weight:600; }
+
+.tableScroll{ overflow:auto; }
+.tbl{ width:100%; border-collapse:collapse; font-size:13px; }
+.tbl .th, .tbl .td{ border-bottom:1px solid var(--line); padding:8px 8px; vertical-align:top; }
+.tbl .th{ text-align:left; position:sticky; top:0; background:var(--card); cursor:pointer; user-select:none; }
+.tbl tr:hover .td{ background:rgba(0,0,0,0.02); }

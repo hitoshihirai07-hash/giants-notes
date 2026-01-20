@@ -66,6 +66,7 @@ export async function onRequest(context) {
     const urls = [];
     urls.push({ loc: `${origin}/`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/stats`, lastmod: topLastmod });
 
     for (const p of index) {
       if (!p?.id) continue;
