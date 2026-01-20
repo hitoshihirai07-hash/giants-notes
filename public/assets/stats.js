@@ -276,8 +276,39 @@ async function main() {
   // 規定値を計算（games.csv の試合数を使う）
   async function ensureQualThresholds() {
     try {
+      // 優先：試合結果（スコアが入っている行）だけを「消化試合」として数える
+      // （ユーザーCSVでは、未実施日の行だけ日付があり、対戦球団/スコアが空のケースがあるため）
       const g = await loadObjects("games");
-      const n = g.data.filter(r => String(r["年月日"] || "").trim()).length;
+
+      const isPlayedGame = (r) => {
+        const opp = String(r["対戦球団"] || "").trim();
+        const score = String(r["スコア"] || "").trim();
+        if (!opp || !score) return false;
+        // 例: ○6-5 / ●2-3 / △3-3 など
+        return /\d+\s*-\s*\d+/.test(score);
+      };
+
+      let n = g.data.filter(isPlayedGame).length;
+
+      // フォールバック：standings.csv から「試合」列 or 勝敗引分の合計
+      if (!n) {
+        const s = await loadObjects("standings");
+        const giantsRow = s.data.find(r => {
+          const t = String(r["チーム"] || r["球団"] || "").trim();
+          return t === "読売ジャイアンツ" || t.endsWith("ジャイアンツ") || t.includes("巨人");
+        });
+        if (giantsRow) {
+          const games = numberOrNaN(giantsRow["試合"]);
+          if (!isNaN(games)) n = games;
+          else {
+            const w = numberOrNaN(giantsRow["勝利"] ?? giantsRow["勝"]);
+            const l = numberOrNaN(giantsRow["敗北"] ?? giantsRow["敗"]);
+            const d = numberOrNaN(giantsRow["引分"] ?? giantsRow["分"]);
+            if (![w,l,d].some(isNaN)) n = w + l + d;
+          }
+        }
+      }
+
       // 0 のときは固定値にしない（ボタンだけ動く）
       state.qualIP = n || 0;
       state.qualPA = n ? Math.ceil(n * 3.1) : 0;
