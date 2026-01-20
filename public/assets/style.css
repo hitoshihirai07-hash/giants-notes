@@ -87,3 +87,22 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .tbl .th, .tbl .td{ border-bottom:1px solid var(--line); padding:8px 8px; vertical-align:top; }
 .tbl .th{ text-align:left; position:sticky; top:0; background:var(--card); cursor:pointer; user-select:none; }
 .tbl tr:hover .td{ background:rgba(0,0,0,0.02); }
+
+/* calendar (stats) */
+.calTop{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+.calMonth{ font-weight:700; font-size:14px; }
+.calGrid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+.calDow{ font-size:12px; color:var(--muted); text-align:center; padding:6px 0; }
+.calCell{ border:1px solid var(--line); border-radius:12px; padding:8px; background:var(--card); min-height:92px; overflow:hidden; }
+.calCell.muted{ opacity:0.55; }
+.calDay{ font-size:12px; font-weight:700; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
+.calMini{ font-size:12px; line-height:1.45; white-space:pre-line; }
+.calMini .r{ font-weight:700; }
+.calMini .ok{ color: var(--ok); font-weight:700; }
+.calMini .bad{ color: var(--bad); font-weight:700; }
+.calMini .draw{ color: var(--muted); font-weight:700; }
+@media (max-width: 640px){
+  .calGrid{ gap:6px; }
+  .calCell{ min-height:80px; padding:7px; }
+  .calMini{ font-size:11px; }
+}

@@ -11,6 +11,12 @@ const DS = {
     hideIfEmpty: ["対戦球団"],
     withOppFilter: true
   },
+  calendar: {
+    label: "カレンダー",
+    // 表示は games.csv を使う（中身は JS 側でカレンダー描画）
+    path: "./data/games.csv",
+    isCalendar: true
+  },
   standings: {
     label: "順位",
     path: "./data/standings.csv"
@@ -105,6 +111,120 @@ function esc(s) {
     .replace(/>/g, "&gt;")
     .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function parseYMD(s) {
+  const v = String(s ?? "").trim();
+  const m = v.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (!y || !mo || !d) return null;
+  return { y, m: mo, d };
+}
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function buildCalendarModel(gameRows) {
+  const byDate = new Map();
+  const monthsSet = new Set();
+
+  for (const r of gameRows) {
+    const p = parseYMD(r["年月日"]);
+    if (!p) continue;
+    const mk = `${p.y}-${pad2(p.m)}`;
+    monthsSet.add(mk);
+    const dk = `${p.y}-${pad2(p.m)}-${pad2(p.d)}`;
+    if (!byDate.has(dk)) byDate.set(dk, r);
+  }
+
+  const months = Array.from(monthsSet).sort();
+  return { months, byDate };
+}
+
+function renderCalendar(model, state, els) {
+  const { calWrap, calGrid, calMonth, calPrev, calNext, statsInfo, stateEl } = els;
+  if (!model || !model.months?.length) {
+    if (statsInfo) statsInfo.hidden = true;
+    if (stateEl) {
+      stateEl.textContent = "データがありません";
+      stateEl.hidden = false;
+    }
+    if (calWrap) calWrap.hidden = true;
+    return;
+  }
+
+  // 初回は「今月」→なければ最新月
+  if (state.calMonthIndex == null || state.calMonthIndex < 0) {
+    const now = new Date();
+    const mk = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}`;
+    const i = model.months.indexOf(mk);
+    state.calMonthIndex = i >= 0 ? i : model.months.length - 1;
+  }
+
+  // clamp
+  if (state.calMonthIndex < 0) state.calMonthIndex = 0;
+  if (state.calMonthIndex >= model.months.length) state.calMonthIndex = model.months.length - 1;
+
+  const mk = model.months[state.calMonthIndex];
+  const [yStr, mStr] = mk.split("-");
+  const y = Number(yStr);
+  const m = Number(mStr);
+  const first = new Date(y, m - 1, 1);
+  const startDow = first.getDay(); // 0=日
+  const daysInMonth = new Date(y, m, 0).getDate();
+
+  if (calMonth) calMonth.textContent = `${y}年${m}月`;
+  if (calPrev) calPrev.disabled = state.calMonthIndex <= 0;
+  if (calNext) calNext.disabled = state.calMonthIndex >= model.months.length - 1;
+
+  const dow = ["日", "月", "火", "水", "木", "金", "土"]; 
+  let html = dow.map(d => `<div class="calDow">${d}</div>`).join("");
+
+  for (let i = 0; i < startDow; i++) {
+    html += `<div class="calCell muted"></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dk = `${y}-${pad2(m)}-${pad2(d)}`;
+    const r = model.byDate.get(dk);
+
+    const oppRaw = r ? String(r["対戦球団"] ?? "").trim() : "";
+    const scoreRaw = r ? String(r["スコア"] ?? "").trim() : "";
+    const starterRaw = r ? String(r["先発投手"] ?? "").trim() : "";
+    const opp = oppRaw ? oppRaw.replace(/\s+/g, "") : "";
+    const score = scoreRaw;
+    const starter = starterRaw;
+
+    const lines = [];
+    if (opp) lines.push(`<div>${esc(opp)}</div>`);
+
+    if (score) {
+      const cls = score.startsWith("○") ? "ok" : score.startsWith("●") ? "bad" : score.startsWith("△") ? "draw" : "";
+      lines.push(`<div class="${cls}">${esc(score)}</div>`);
+    } else if (opp) {
+      lines.push(`<div class="draw">予定</div>`);
+    }
+
+    if (opp) {
+      lines.push(`<div>先発:${esc(starter || "-")}</div>`);
+    } else if (starter) {
+      lines.push(`<div>先発:${esc(starter)}</div>`);
+    }
+
+    const muted = !opp && !score && !starter;
+    html += `
+      <div class="calCell${muted ? " muted" : ""}">
+        <div class="calDay"><span>${d}</span></div>
+        <div class="calMini">${lines.join("")}</div>
+      </div>
+    `;
+  }
+
+  if (calGrid) calGrid.innerHTML = html;
 }
 
 function normalizeForSearch(s) {
@@ -256,11 +376,21 @@ function renderTable({ key, header, data }, state) {
 async function main() {
   const stateEl = $("statsState");
   const wrap = $("tableWrap");
+  const calWrap = $("calendarWrap");
   const opp = $("opp");
   const qualBtn = $("qualBtn");
   const sortSel = $("sortSel");
   const sortDirBtn = $("sortDirBtn");
   const sortClearBtn = $("sortClearBtn");
+
+  const statsQ = $("statsQ");
+  const statsExtra = $("statsExtra");
+  const calPrev = $("calPrev");
+  const calNext = $("calNext");
+  const calGrid = $("calGrid");
+  const calMonth = $("calMonth");
+  const statsInfo = $("statsInfo");
+  const calEls = { calWrap, calGrid, calMonth, calPrev, calNext, statsInfo, stateEl };
 
   const state = {
     tab: "games",
@@ -270,7 +400,11 @@ async function main() {
     sortDir: "asc",
     qualifiedOnly: false,
     qualPA: 0,
-    qualIP: 0
+    qualIP: 0,
+
+    // calendar
+    calMonthIndex: -1,
+    calModel: null
   };
 
   // 規定値を計算（games.csv の試合数を使う）
@@ -373,7 +507,7 @@ async function main() {
 
   function setActiveTab(tab) {
     state.tab = tab;
-    state.q = $("statsQ")?.value || "";
+    state.q = statsQ?.value || "";
     state.opp = opp?.value || "";
     state.sortKey = "";
     state.sortDir = "asc";
@@ -383,8 +517,15 @@ async function main() {
       btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
     });
 
+    const isCalendar = tab === "calendar";
+
+    // 検索欄 / 追加ボタン類
+    if (statsQ) statsQ.hidden = isCalendar;
+    if (statsExtra) statsExtra.hidden = isCalendar;
+
+    // 対戦相手フィルタ
     if (opp) {
-      const show = !!DS[tab]?.withOppFilter;
+      const show = !isCalendar && !!DS[tab]?.withOppFilter;
       opp.hidden = !show;
     }
 
@@ -407,8 +548,8 @@ async function main() {
   });
 
   // search handlers
-  $("statsQ")?.addEventListener("input", async () => {
-    state.q = $("statsQ")?.value || "";
+  statsQ?.addEventListener("input", async () => {
+    state.q = statsQ?.value || "";
     await refresh(false);
   });
 
@@ -423,6 +564,21 @@ async function main() {
         stateEl.textContent = "読み込み中…";
         stateEl.hidden = false;
         wrap.hidden = true;
+        if (calWrap) calWrap.hidden = true;
+      }
+
+      // カレンダーは games.csv を読んでカレンダー描画
+      if (state.tab === "calendar") {
+        const g = await loadObjects("games");
+        state.calModel = buildCalendarModel(g.data);
+
+        stateEl.hidden = true;
+        wrap.hidden = true;
+        if (calWrap) calWrap.hidden = false;
+        if (statsInfo) statsInfo.hidden = true;
+
+        renderCalendar(state.calModel, state, calEls);
+        return;
       }
 
       const payload = await loadObjects(state.tab);
@@ -433,15 +589,30 @@ async function main() {
 
       stateEl.hidden = true;
       wrap.hidden = false;
+      if (calWrap) calWrap.hidden = true;
 
       renderTable({ key: state.tab, ...payload }, state);
     } catch (e) {
       stateEl.textContent = `読み込み失敗: ${e.message}`;
       stateEl.hidden = false;
       wrap.hidden = true;
-      $("statsInfo").hidden = true;
+      if (calWrap) calWrap.hidden = true;
+      if (statsInfo) statsInfo.hidden = true;
     }
   }
+
+  // calendar navigation
+  calPrev?.addEventListener("click", () => {
+    if (state.tab !== "calendar") return;
+    state.calMonthIndex = Math.max(0, (state.calMonthIndex || 0) - 1);
+    renderCalendar(state.calModel, state, calEls);
+  });
+  calNext?.addEventListener("click", () => {
+    if (state.tab !== "calendar") return;
+    const max = (state.calModel?.months?.length || 1) - 1;
+    state.calMonthIndex = Math.min(max, (state.calMonthIndex || 0) + 1);
+    renderCalendar(state.calModel, state, calEls);
+  });
 
   // extra controls handlers
   qualBtn?.addEventListener("click", async () => {

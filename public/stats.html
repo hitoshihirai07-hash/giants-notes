@@ -26,6 +26,7 @@
 
     <div class="tabs" role="tablist" aria-label="成績タブ">
       <button class="tabbtn" data-tab="games" type="button">試合結果</button>
+      <button class="tabbtn" data-tab="calendar" type="button">カレンダー</button>
       <button class="tabbtn" data-tab="standings" type="button">順位</button>
       <button class="tabbtn" data-tab="batters" type="button">打者</button>
       <button class="tabbtn" data-tab="pitchers" type="button">投手</button>
@@ -56,6 +57,17 @@
         <table id="tbl" class="tbl"></table>
       </div>
     </div>
+
+    <div id="calendarWrap" class="card" hidden>
+      <div class="calTop">
+        <button id="calPrev" class="btn" type="button">前の月</button>
+        <div id="calMonth" class="calMonth">-</div>
+        <button id="calNext" class="btn" type="button">次の月</button>
+      </div>
+      <div id="calHint" class="meta" style="margin-top:6px;">月を切り替えて試合結果を確認できます（対戦相手／結果／先発）。</div>
+      <div id="calGrid" class="calGrid" style="margin-top:10px;"></div>
+    </div>
+
   </main>
 
   <footer class="wrap foot">
