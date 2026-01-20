@@ -7,6 +7,8 @@
     if (p === "/about.html") return "/about";
     if (p === "/post.html") return "/post";
     if (p === "/admin.html") return "/admin";
+    if (p === "/stats.html") return "/stats";
+    if (p === "/admin-open.html") return "/admin-open";
     return p || "/";
   }
 

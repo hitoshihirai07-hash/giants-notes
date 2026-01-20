@@ -106,7 +106,16 @@ function renderTable({ key, header, data }, state) {
         state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = k;
-        state.sortDir = "asc";
+        // 初回クリックは「数値なら大きい順」（防御率だけ小さい順）
+        if (k === "防御率") state.sortDir = "asc";
+        else {
+          const sample = rows.slice(0, 20);
+          const isNum = sample.some(r => {
+            const c = toComparable(String(r[k] ?? "").trim());
+            return c.type === "num";
+          });
+          state.sortDir = isNum ? "desc" : "asc";
+        }
       }
       renderTable({ key, header, data }, state);
     });
