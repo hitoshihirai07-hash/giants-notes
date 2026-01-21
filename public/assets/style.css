@@ -37,8 +37,6 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   border-radius: 14px;
   padding: 14px;
 }
-/* <a class="card"> をカードとして扱えるように */
-a.card { display: block; }
 .card a { color: var(--fg); text-decoration: none; }
 .card a:hover { text-decoration: underline; }
 .meta { color: var(--muted); font-size: 13px; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
@@ -54,16 +52,6 @@ a.card { display: block; }
 .row { display:flex; gap:10px; align-items:center; margin-top: 10px; flex-wrap: wrap; }
 .grid { display:grid; grid-template-columns: 1fr 220px; gap: 10px; }
 @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
-
-/* トップ/管理画面用の簡易グリッド */
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-@media (max-width: 800px) {
-  .grid3 { grid-template-columns: 1fr; }
-}
-@media (max-width: 640px) {
-  .grid2 { grid-template-columns: 1fr; }
-}
 
 .btn {
   padding: 10px 12px;
@@ -118,3 +106,23 @@ a.card { display: block; }
   .calCell{ min-height:80px; padding:7px; }
   .calMini{ font-size:11px; }
 }
+
+/* ---- layout helpers (トップ/管理画面の崩れ対策) ---- */
+.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.grid3{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+@media (max-width: 760px){
+  .grid2{ grid-template-columns: 1fr; }
+  .grid3{ grid-template-columns: 1fr; }
+}
+.grid2 > *, .grid3 > *{ min-width: 0; }
+
+/* a.card が inline のままだと中身が崩れるので block に固定 */
+.card{ display:block; }
+
+/* ナビは折り返し前提で並べる */
+.nav{ display:flex; gap:12px; flex-wrap:wrap; }
+
+/* フォーム系 */
+.input.full{ flex: 1; }
+.textarea{ min-height: 160px; resize: vertical; }
+.hp{ position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }

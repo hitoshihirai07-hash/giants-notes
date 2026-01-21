@@ -16,14 +16,15 @@
   function parsePosts(json) {
     if (!Array.isArray(json)) return [];
     return json
-      .filter(p => p && p.slug && !p.hidden)
+      .filter(p => p && p.slug)
       .map(p => ({
         slug: String(p.slug),
         title: String(p.title || ""),
         datetime: String(p.datetime || p.date || ""),
         info: String(p.info || ""),
         excerpt: String(p.excerpt || ""),
-        tags: Array.isArray(p.tags) ? p.tags.map(String) : []
+        tags: Array.isArray(p.tags) ? p.tags.map(String) : [],
+        hidden: !!p.hidden
       }))
       .sort((a, b) => String(b.datetime).localeCompare(String(a.datetime)));
   }
@@ -100,11 +101,12 @@
       const res = await fetch("/posts/posts.json", { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      raw = parsePosts(json);
+      raw = parsePosts(json).filter(p => !p.hidden);
       if (state) state.textContent = "";
     } catch (e) {
       raw = [];
-      if (state) state.textContent = `読み込み失敗: ${e.message}`;
+      if (state) state.textContent = "一覧を読み込めませんでした。";
+      console.error(e);
     }
 
     $("q")?.addEventListener("input", render);

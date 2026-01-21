@@ -4,25 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>お問い合わせ | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="ご意見・ご連絡はこちらから送れます。内容は必ず採用とは限りませんが、参考にします。" />
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://giants-notes.pages.dev/contact" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#f7f7f7" />
+  <meta name="description" content="ご意見・ご連絡はこちらから送信できます（Turnstile認証あり）。" />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/assets/style.css" />
-  <script src="/assets/seo.js" defer></script>
+  <style>
+    .msg{ padding:10px 12px; border-radius:12px; margin:10px 0; }
+    .msg.ok{ background:#ecfdf3; border:1px solid #bbf7d0; }
+    .msg.bad{ background:#fff7ed; border:1px solid #fed7aa; }
+    .row{ display:flex; gap:10px; }
+    .row > *{ flex:1; }
+    .label{ font-size:13px; color:#4b5563; }
+    .textarea{ min-height:140px; }
+    .hp{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+  </style>
 </head>
 <body>
   <header class="wrap">
-    <a class="back" href="/">← トップへ</a>
     <div class="head">
       <div>
+        <a class="back" href="/">← トップ</a>
         <h1>お問い合わせ</h1>
-        <p class="sub">ご意見・修正点などがあれば送れます（必ず採用とは限りません）。</p>
+        <p class="sub">内容は必ず採用とは限りませんが、参考にします。</p>
       </div>
       <nav class="nav">
         <a href="/posts/">メモ一覧</a>
@@ -33,48 +36,47 @@
   </header>
 
   <main class="wrap">
-    <div class="card">
-      <div id="contactMsg" class="msg" hidden></div>
+    <div id="contactMsg" class="msg" hidden></div>
 
-      <form id="contactForm" class="form">
-        <div class="grid2">
-          <div>
-            <label class="label">お名前（任意）</label>
-            <input id="cName" class="input full" placeholder="例：ソラ" />
-          </div>
-          <div>
-            <label class="label">返信先（任意）</label>
-            <input id="cReply" class="input full" placeholder="例：Threads / X / メール など" />
-          </div>
-        </div>
-
-        <div style="display:none;">
-          <label class="label">Webサイト（入力しない）</label>
-          <input id="cWebsite" class="input full" autocomplete="off" />
-        </div>
-
+    <form id="contactForm" class="card">
+      <div class="row">
         <div>
-          <label class="label">内容（必須）</label>
-          <textarea id="cBody" class="input full" rows="8" placeholder="例：誤字の指摘、表示の不具合、追加してほしい内容 など"></textarea>
+          <div class="label">お名前（任意）</div>
+          <input id="cName" class="input" placeholder="例：ソラ" maxlength="80" />
         </div>
+        <div>
+          <div class="label">返信先（任意）</div>
+          <input id="cReply" class="input" placeholder="例：ThreadsのURL / メール等" maxlength="200" />
+        </div>
+      </div>
 
-        <div class="row" style="justify-content:space-between;">
-          <div id="cfTurnstile"></div>
-          <div class="row" style="gap:8px;">
-            <button id="cClear" class="btn ghost" type="button">クリア</button>
-            <button class="btn" type="submit">送信</button>
-          </div>
-        </div>
-        <p class="hint">※荒らし対策のため認証（Turnstile）が入ります。</p>
-      </form>
-    </div>
+      <div style="margin-top:10px;">
+        <div class="label">内容（必須）</div>
+        <textarea id="cBody" class="input textarea" placeholder="例：誤字の連絡、追加してほしい内容など"></textarea>
+      </div>
+
+      <!-- honeypot（ボット対策） -->
+      <div class="hp" aria-hidden="true">
+        <label>Website<input id="cWebsite" autocomplete="off" /></label>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div id="cfTurnstile"></div>
+        <p class="hint" style="margin-top:8px;">※送信には認証が必要です。<a href="/policy.html">プライバシーポリシー</a>もご確認ください。</p>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button class="btn" type="submit">送信</button>
+        <button id="cClear" class="btn ghost" type="button">クリア</button>
+      </div>
+    </form>
   </main>
 
   <footer class="wrap foot">
     <small>© 読売ジャイアンツ 良かったところメモ</small>
   </footer>
 
-  <script src="/assets/contact.js" defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
+  <script src="/assets/contact.js" defer></script>
 </body>
 </html>
