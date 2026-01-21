@@ -106,3 +106,17 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   .calCell{ min-height:80px; padding:7px; }
   .calMini{ font-size:11px; }
 }
+
+/* トップの2枚カード用 */
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+@media (max-width:640px){
+  .grid2{ grid-template-columns:1fr; }
+}
+
+/* a.card をブロック要素として扱う（崩れ防止） */
+.card{ display:block; }
+
