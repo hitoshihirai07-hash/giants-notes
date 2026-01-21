@@ -5,39 +5,6 @@ function xmlResponse(body, init = {}) {
   return new Response(body, { ...init, headers });
 }
 
-function getKvOrThrow(env) {
-  const kv = env?.POSTS;
-  if (!kv) throw new Error("KV binding 'POSTS' が設定されていません");
-  if (typeof kv.get !== "function" || typeof kv.put !== "function") {
-    throw new Error("'POSTS' はKVバインディングではありません（環境変数ではなくKVとして設定してください）");
-  }
-  return kv;
-}
-
-async function getIndex(kv) {
-  const raw = await kv.get("posts:index");
-  if (!raw) return [];
-  try {
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
-
-function toW3CDateTime(isoOrDate) {
-  if (!isoOrDate) return "";
-  // already ISO
-  if (/^\d{4}-\d{2}-\d{2}T/.test(isoOrDate)) return isoOrDate;
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(isoOrDate)) return `${isoOrDate}T00:00:00Z`;
-  try {
-    const d = new Date(isoOrDate);
-    if (!isNaN(d.getTime())) return d.toISOString();
-  } catch {}
-  return "";
-}
-
 function escXml(s) {
   return String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -47,38 +14,57 @@ function escXml(s) {
     .replace(/'/g, "&apos;");
 }
 
+function toW3CDate(yyyyMmDd) {
+  if (!yyyyMmDd) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(yyyyMmDd)) return `${yyyyMmDd}T00:00:00Z`;
+  return "";
+}
+
+async function loadStaticPosts(origin) {
+  try {
+    const res = await fetch(`${origin}/posts/posts.json?ts=${Date.now()}`, {
+      headers: { "cache-control": "no-store" }
+    });
+    if (!res.ok) return [];
+    const json = await res.json().catch(() => null);
+    return Array.isArray(json) ? json : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function onRequest(context) {
   try {
     if (context.request.method !== "GET") {
       return xmlResponse("", { status: 405 });
     }
 
-    const kv = getKvOrThrow(context.env);
     const reqUrl = new URL(context.request.url);
     const origin = reqUrl.origin;
 
-    const index = await getIndex(kv);
-
-    // トップや /about の lastmod は「最新記事の更新日時」を採用（無い場合は現在）
-    const newest = index.find(Boolean);
-    const topLastmod = toW3CDateTime(newest?.updatedAt || newest?.createdAt || new Date().toISOString());
+    const posts = await loadStaticPosts(origin);
+    const newest = posts[0];
+    const newestDate = String(newest?.datetime || "").slice(0, 10);
+    const topLastmod = toW3CDate(newestDate) || new Date().toISOString();
 
     const urls = [];
     urls.push({ loc: `${origin}/`, lastmod: topLastmod });
-    urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/posts/`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/stats`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
 
-    for (const p of index) {
-      if (!p?.id) continue;
-      const lastmod = toW3CDateTime(p?.updatedAt || p?.createdAt || p?.date);
-      const loc = `${origin}/post?id=${encodeURIComponent(p.id)}`;
-      urls.push({ loc, lastmod });
+    for (const p of posts) {
+      const slug = String(p?.slug || "").trim();
+      if (!slug) continue;
+      const d = String(p?.datetime || "").slice(0, 10);
+      const lastmod = toW3CDate(d) || "";
+      urls.push({ loc: `${origin}/posts/${encodeURIComponent(slug)}`, lastmod });
     }
 
     const xml = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-      ...urls.map(u => {
+      ...urls.map((u) => {
         const lm = u.lastmod ? `<lastmod>${escXml(u.lastmod)}</lastmod>` : "";
         return `  <url><loc>${escXml(u.loc)}</loc>${lm}</url>`;
       }),
@@ -87,7 +73,6 @@ export async function onRequest(context) {
 
     return xmlResponse(xml);
   } catch (e) {
-    // 失敗してもXMLとして返す（Search Consoleにエラーが見えるように）
     const msg = escXml(String(e?.message || e));
     const xml = [
       '<?xml version="1.0" encoding="UTF-8"?>',

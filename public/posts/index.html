@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>静的記事一覧 | 読売ジャイアンツ 良かったところメモ</title>
+  <meta name="description" content="管理者が作成した静的（HTML）記事の一覧です。" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://giants-notes.pages.dev/posts/" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script src="/assets/posts.js" defer></script>
+  <script src="/assets/seo.js" defer></script>
+</head>
+<body>
+  <header class="wrap">
+    <a class="back" href="/">← 一覧へ</a>
+    <div class="head">
+      <div>
+        <h1>静的記事一覧</h1>
+      </div>
+      <nav class="nav">
+        <a href="/stats">成績・試合結果</a>
+        <a href="/about">このサイトについて</a>
+      </nav>
+    </div>
+
+    <div class="controls">
+      <input id="q" class="input full" placeholder="検索（タイトル・タグ・抜粋）" />
+    </div>
+
+    <div id="tags" class="row"></div>
+  </header>
+
+  <main class="wrap">
+    <div id="state" class="state">読み込み中…</div>
+    <div id="list" class="list"></div>
+  </main>
+
+  <footer class="wrap foot">
+    <small>© 読売ジャイアンツ 良かったところメモ</small>
+  </footer>
+</body>
+</html>

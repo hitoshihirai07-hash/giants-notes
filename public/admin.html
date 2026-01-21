@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>投稿 | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="管理者用ページ（検索結果には表示されません）。操作用。" />
+  <title>投稿（管理） | 読売ジャイアンツ 良かったところメモ</title>
+  <meta name="description" content="管理者用ページ（検索結果には表示されません）。" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -17,7 +17,7 @@
 </head>
 <body>
   <header class="wrap">
-    <a class="back" href="./">← 一覧へ</a>
+    <a class="back" href="/">← トップへ</a>
     <h1>投稿（管理）</h1>
   </header>
 
@@ -26,64 +26,79 @@
       <label class="label">管理トークン</label>
       <input id="token" class="input full" type="password" placeholder="最初に設定した ADMIN_TOKEN" />
       <div class="row">
-        <button id="saveToken" class="btn">保存</button>
-        <button id="clearToken" class="btn ghost">消す</button>
+        <button id="saveToken" class="btn" type="button">保存</button>
+        <button id="clearToken" class="btn ghost" type="button">消す</button>
         <a class="btn" href="./admin-open">オープン戦成績</a>
+        <a class="btn" href="/posts/">メモ一覧</a>
       </div>
+      <div id="msg" class="msg" hidden></div>
       <p class="hint">※トークンはこの端末のローカル保存（localStorage）に入ります。</p>
     </div>
 
-    <div class="card" style="margin-top:12px;">
-      <div id="msg" class="msg" hidden></div>
+    <section id="staticTool" style="margin-top:12px;">
+      <div class="card">
+        <h2 class="h2">静的記事を作成（HTML）</h2>
+        <div id="stMsg" class="msg" hidden></div>
 
-      <form id="form" class="form">
-        <div class="grid">
-          <div>
-            <label class="label">タイトル（必須）</label>
-            <input id="title" class="input full" required />
+        <form id="stForm" class="form">
+          <div class="grid2">
+            <div>
+              <label class="label">タイトル（必須）</label>
+              <input id="st_title" class="input full" placeholder="例：2026年キャンプの期待" />
+            </div>
+            <div>
+              <label class="label">タグ（任意：カンマ区切り）</label>
+              <input id="st_tags" class="input full" placeholder="例：キャンプ,岡本和真" />
+            </div>
           </div>
-          <div>
-            <label class="label">日付（必須）</label>
-            <input id="date" class="input full" type="date" required />
+
+          <div class="grid3">
+            <div>
+              <label class="label">日付（必須）</label>
+              <input id="st_date" class="input full" type="date" />
+            </div>
+            <div>
+              <label class="label">時間（必須）</label>
+              <input id="st_time" class="input full" type="time" />
+            </div>
+            <div>
+              <label class="label">詳細（任意）</label>
+              <input id="st_info" class="input full" placeholder="例：キャンプ前メモ" />
+            </div>
           </div>
-        </div>
 
-        <label class="label">情報（任意）</label>
-        <input id="info" class="input full" />
+          <div>
+            <label class="label">本文（必須：改行で段落）</label>
+            <textarea id="st_body" class="input full" rows="10" placeholder="良かった点だけメモしていきます"></textarea>
+          </div>
 
-        <label class="label">タグ（任意・カンマ区切り）</label>
-        <input id="tags" class="input full" />
-
-        <label class="label">本文（必須）</label>
-        <textarea id="body" class="input full" rows="10" required></textarea>
-        <p class="hint" style="margin-top:8px;">※空行で段落区切り</p>
-
-        <div class="row">
-          <button id="submit" class="btn primary" type="submit">投稿</button>
-          <button id="preview" class="btn" type="button">プレビュー</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <h2 class="h2">プレビュー</h2>
-      <div id="previewArea" class="preview"></div>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <div class="row" style="justify-content: space-between; align-items: center;">
-        <h2 class="h2" style="margin:0;">受信箱</h2>
-        <div class="row" style="gap:8px;">
-          <button id="inboxReload" class="btn" type="button">更新</button>
-        </div>
+          <div class="row">
+            <button id="stPreview" class="btn ghost" type="button">プレビュー更新</button>
+            <button id="stDownloadPost" class="btn" type="button">記事HTMLをダウンロード</button>
+            <button id="stDownloadIndex" class="btn" type="button">posts.json をダウンロード</button>
+          </div>
+          <p class="hint">作業手順：①記事HTMLとposts.jsonをダウンロード → ② <code>/public/posts/</code> に記事HTMLを置く → ③ <code>/public/posts/posts.json</code> を上書き → ④ push &amp; deploy</p>
+        </form>
       </div>
-      <p class="hint" style="margin-top:8px;">/about のフォームから届いたメモがここに出ます（最新50件）。</p>
-      <div id="inbox" class="list" style="margin-top:10px;"></div>
+
+      <div class="card" style="margin-top:12px;">
+        <h2 class="h2">プレビュー</h2>
+        <div id="stPreviewArea" class="preview"></div>
+      </div>
+    </section>
+
+    <div class="card" style="margin-top:12px;">
+      <h2 class="h2">お問い合わせ 受信箱（管理者のみ）</h2>
+      <div class="row" style="margin-bottom:10px; gap:8px;">
+        <button id="inboxReload" class="btn" type="button">更新</button>
+      </div>
+      <div id="inbox"></div>
+      <p class="hint">※表示にはトークンが必要です。<br>※削除はこの画面から行えます。</p>
     </div>
   </main>
 
   <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="./about">このサイトについて</a></small>
+    <small>© 読売ジャイアンツ 良かったところメモ</small>
   </footer>
 
   <script src="./assets/admin.js"></script>
