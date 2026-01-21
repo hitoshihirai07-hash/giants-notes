@@ -2,6 +2,13 @@ const Admin = (() => {
   const escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   const $ = (id) => document.getElementById(id);
 
+  // id で要素を取ってイベントを張る（存在しない場合は無視）
+  function on(id, evt, handler, opts) {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener(evt, handler, opts);
+  }
+
   function esc(s) {
     return String(s ?? "").replace(/[&<>"']/g, (c) => escMap[c]);
   }
@@ -172,6 +179,141 @@ const Admin = (() => {
 </html>`;
   }
 
+  function buildPostsIndexHtml(posts) {
+    const arr = Array.isArray(posts) ? posts : [];
+    const tags = Array.from(
+      new Set(
+        arr
+          .flatMap((p) => (Array.isArray(p?.tags) ? p.tags : []))
+          .map((t) => String(t || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b, "ja"));
+
+    const itemsHtml = arr
+      .map((p) => {
+        const slug = String(p?.slug || "").trim();
+        if (!slug) return "";
+        const title = String(p?.title || "").trim() || "(無題)";
+        const datetime = String(p?.datetime || "").trim();
+        const info = String(p?.info || "").trim();
+        const excerpt = String(p?.excerpt || "").trim();
+        const ptags = Array.isArray(p?.tags) ? p.tags.map((t) => String(t || "").trim()).filter(Boolean) : [];
+        const tagStr = ptags.join(",");
+        const q = [title, info, excerpt, tagStr].filter(Boolean).join(" ");
+        const tagSpans = ptags.map((t) => `<span class="tag">${esc(t)}</span>`).join("");
+        const infoSpan = info ? `<span>・ ${esc(info)}</span>` : "";
+        const href = `/posts/${encodeURIComponent(slug)}`;
+        const sub = excerpt ? `<div class="sub">${esc(excerpt)}</div>` : "";
+
+        return `
+<article class="card post" data-tags="${esc(tagStr)}" data-q="${esc(q)}">
+  <a href="${esc(href)}"><strong>${esc(title)}</strong></a>
+  <div class="meta">
+    <span>${esc(datetime)}</span>
+    ${infoSpan}
+    ${tagSpans}
+  </div>
+  ${sub}
+</article>`;
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const tagBtns = tags
+      .map((t) => `<button type="button" class="tabbtn" data-tag="${esc(t)}">${esc(t)}</button>`)
+      .join("");
+
+    const desc = "読売ジャイアンツのメモ一覧。検索やタグで過去ログを見返せます。";
+
+    return `<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>メモ一覧 | 読売ジャイアンツ 良かったところメモ</title>
+  <meta name="description" content="${esc(desc)}" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://giants-notes.pages.dev/posts/" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script src="/assets/seo.js" defer></script>
+</head>
+<body>
+  <header class="wrap">
+    <a class="back" href="/">← トップへ</a>
+    <div class="head">
+      <div>
+        <h1>メモ一覧</h1>
+        <p id="count" class="sub"></p>
+      </div>
+      <nav class="nav">
+        <a href="/stats">成績・試合結果</a>
+        <a href="/about">このサイトについて</a>
+      </nav>
+    </div>
+
+    <div class="controls">
+      <input id="q" class="input full" placeholder="検索（タイトル・タグ・本文抜粋）" />
+      <button id="clear" class="btn ghost" type="button">クリア</button>
+    </div>
+
+    <div id="tags" class="tabs">${tagBtns}</div>
+  </header>
+
+  <main class="wrap">
+    <div id="list" class="list">${itemsHtml || `<div class="card">まだありません</div>`}</div>
+    <noscript><p class="hint">※検索やタグの絞り込みは JavaScript が必要です。</p></noscript>
+  </main>
+
+  <footer class="wrap foot">
+    <small>© 読売ジャイアンツ 良かったところメモ</small>
+  </footer>
+
+  <script>
+  (() => {
+    const q = document.getElementById('q');
+    const clear = document.getElementById('clear');
+    const count = document.getElementById('count');
+    const items = Array.from(document.querySelectorAll('.post'));
+    const tagBtns = Array.from(document.querySelectorAll('[data-tag]'));
+    let activeTag = '';
+
+    function apply() {
+      const kw = (q?.value || '').trim().toLowerCase();
+      let visible = 0;
+      for (const it of items) {
+        const text = (it.getAttribute('data-q') || '').toLowerCase();
+        const tags = it.getAttribute('data-tags') || '';
+        const okKw = !kw || text.includes(kw);
+        const okTag = !activeTag || ((',' + tags + ',').includes(',' + activeTag + ','));
+        const ok = okKw && okTag;
+        it.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+      }
+      if (count) count.textContent = visible ? (String(visible) + '件') : '';
+      for (const b of tagBtns) {
+        b.classList.toggle('active', (b.getAttribute('data-tag') || '') === activeTag);
+      }
+    }
+
+    for (const b of tagBtns) {
+      b.addEventListener('click', () => {
+        const t = b.getAttribute('data-tag') || '';
+        activeTag = (activeTag === t) ? '' : t;
+        apply();
+      });
+    }
+    q?.addEventListener('input', apply);
+    clear?.addEventListener('click', () => { if (q) q.value = ''; activeTag = ''; apply(); });
+
+    apply();
+  })();
+  </script>
+</body>
+</html>`;
+  }
+
   function renderStaticPreview() {
     const title = $("st_title")?.value?.trim() || "";
     const date = $("st_date")?.value || "";
@@ -232,8 +374,33 @@ const Admin = (() => {
     const entry = toEntry({ fileName, title, date, time, info, tags, body });
     postsIndex = upsertEntry(postsIndex, entry);
 
-    downloadText("posts.json", JSON.stringify(postsIndex, null, 2), "application/json;charset=utf-8");
-    showStMsg("ok", "posts.json をダウンロードしました（記事一覧用）");
+    const jsonText = JSON.stringify(postsIndex, null, 2);
+    const indexHtml = buildPostsIndexHtml(postsIndex);
+
+    // 2ファイルをまとめて落とす（アップロード先は /public/posts/ 配下）
+    downloadText("posts.json", jsonText, "application/json;charset=utf-8");
+    downloadText("index.html", indexHtml, "text/html;charset=utf-8");
+    showStMsg("ok", "一覧ファイル（posts.json / index.html）をダウンロードしました");
+  }
+
+  function initTabs() {
+    const btns = Array.from(document.querySelectorAll("[data-admin-tab]"));
+    const panels = Array.from(document.querySelectorAll("[data-admin-panel]"));
+    if (!btns.length || !panels.length) return;
+
+    const show = (tab) => {
+      for (const p of panels) {
+        p.style.display = p.getAttribute("data-admin-panel") === tab ? "" : "none";
+      }
+      for (const b of btns) {
+        b.classList.toggle("active", b.getAttribute("data-admin-tab") === tab);
+      }
+    };
+
+    for (const b of btns) {
+      b.addEventListener("click", () => show(b.getAttribute("data-admin-tab") || ""));
+    }
+    show(btns[0].getAttribute("data-admin-tab") || "");
   }
 
   function saveToken() {
@@ -362,6 +529,8 @@ const Admin = (() => {
 
   function init() {
     loadToken();
+
+    initTabs();
 
     // token
     on("saveToken", "click", () => saveToken());

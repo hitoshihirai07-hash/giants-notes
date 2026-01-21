@@ -35,9 +35,14 @@
       <p class="hint">※トークンはこの端末のローカル保存（localStorage）に入ります。</p>
     </div>
 
-    <section id="staticTool" style="margin-top:12px;">
+    <div class="tabs" style="margin-top:12px;">
+      <button type="button" class="tabbtn active" data-admin-tab="post">記事作成</button>
+      <button type="button" class="tabbtn" data-admin-tab="inbox">受信箱</button>
+    </div>
+
+    <section id="staticTool" data-admin-panel="post" style="margin-top:12px;">
       <div class="card">
-        <h2 class="h2">静的記事を作成（HTML）</h2>
+        <h2 class="h2">記事を作成（HTML）</h2>
         <div id="stMsg" class="msg" hidden></div>
 
         <form id="stForm" class="form">
@@ -75,9 +80,15 @@
           <div class="row">
             <button id="stPreview" class="btn ghost" type="button">プレビュー更新</button>
             <button id="stDownloadPost" class="btn" type="button">記事HTMLをダウンロード</button>
-            <button id="stDownloadIndex" class="btn" type="button">posts.json をダウンロード</button>
+            <button id="stDownloadIndex" class="btn" type="button">一覧ファイルをダウンロード</button>
           </div>
-          <p class="hint">作業手順：①記事HTMLとposts.jsonをダウンロード → ② <code>/public/posts/</code> に記事HTMLを置く → ③ <code>/public/posts/posts.json</code> を上書き → ④ push &amp; deploy</p>
+          <p class="hint">
+            手順：<br>
+            ①「記事HTML」をダウンロード<br>
+            ②「一覧ファイル（posts.json / index.html）」をダウンロード<br>
+            ③ GitHub の <b>public/posts/</b> に記事HTMLと <b>index.html</b> をアップロード<br>
+            ④ <b>public/posts/posts.json</b> を上書きして push（自動でデプロイ）
+          </p>
         </form>
       </div>
 
@@ -87,14 +98,16 @@
       </div>
     </section>
 
-    <div class="card" style="margin-top:12px;">
-      <h2 class="h2">お問い合わせ 受信箱（管理者のみ）</h2>
-      <div class="row" style="margin-bottom:10px; gap:8px;">
-        <button id="inboxReload" class="btn" type="button">更新</button>
+    <section data-admin-panel="inbox" style="margin-top:12px; display:none;">
+      <div class="card">
+        <h2 class="h2">お問い合わせ 受信箱（管理者のみ）</h2>
+        <div class="row" style="margin-bottom:10px; gap:8px;">
+          <button id="inboxReload" class="btn" type="button">更新</button>
+        </div>
+        <div id="inbox"></div>
+        <p class="hint">※表示にはトークンが必要です。<br>※削除はこの画面から行えます。</p>
       </div>
-      <div id="inbox"></div>
-      <p class="hint">※表示にはトークンが必要です。<br>※削除はこの画面から行えます。</p>
-    </div>
+    </section>
   </main>
 
   <footer class="wrap foot">
