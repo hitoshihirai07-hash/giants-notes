@@ -107,16 +107,9 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   .calMini{ font-size:11px; }
 }
 
-/* トップの2枚カード用 */
-.grid2{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-}
-@media (max-width:640px){
-  .grid2{ grid-template-columns:1fr; }
-}
+.card{display:block;}
 
-/* a.card をブロック要素として扱う（崩れ防止） */
-.card{ display:block; }
 
+/* 2カラムカード用 */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+@media (max-width:720px){.grid2{grid-template-columns:1fr;}}
