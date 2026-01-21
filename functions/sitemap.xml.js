@@ -43,7 +43,8 @@ export async function onRequest(context) {
     const origin = reqUrl.origin;
 
     const posts = await loadStaticPosts(origin);
-    const newest = posts[0];
+    const visiblePosts = posts.filter((p) => p && p.slug && !p.hidden);
+    const newest = visiblePosts[0];
     const newestDate = String(newest?.datetime || "").slice(0, 10);
     const topLastmod = toW3CDate(newestDate) || new Date().toISOString();
 
@@ -53,7 +54,7 @@ export async function onRequest(context) {
     urls.push({ loc: `${origin}/stats`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
 
-    for (const p of posts) {
+    for (const p of visiblePosts) {
       const slug = String(p?.slug || "").trim();
       if (!slug) continue;
       const d = String(p?.datetime || "").slice(0, 10);

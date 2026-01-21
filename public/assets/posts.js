@@ -16,7 +16,7 @@
   function parsePosts(json) {
     if (!Array.isArray(json)) return [];
     return json
-      .filter(p => p && p.slug)
+      .filter(p => p && p.slug && !p.hidden)
       .map(p => ({
         slug: String(p.slug),
         title: String(p.title || ""),

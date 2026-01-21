@@ -94,7 +94,7 @@ const Admin = (() => {
     return `${date}-${hhmm}.html`;
   }
 
-  function toEntry({ fileName, title, date, time, info, tags, body }) {
+  function toEntry({ fileName, title, date, time, info, tags, body, hidden }) {
     const dt = `${date} ${time}`;
     return {
       slug: fileName,
@@ -102,7 +102,8 @@ const Admin = (() => {
       datetime: dt,
       info: info || "",
       tags: tags || [],
-      excerpt: firstDesc(body)
+      excerpt: firstDesc(body),
+      hidden: !!hidden
     };
   }
 
@@ -125,6 +126,123 @@ const Admin = (() => {
     } catch {
       // ignore
     }
+  }
+
+  // ---- メモ管理（一覧の表示/非表示・削除） ----
+  function showPmMsg(kind, text) {
+    const el = $("pmMsg");
+    if (!el) return;
+    el.hidden = false;
+    el.className = `msg ${kind}`;
+    el.innerHTML = String(text || "");
+  }
+
+  function hidePmMsg() {
+    const el = $("pmMsg");
+    if (!el) return;
+    el.hidden = true;
+    el.innerHTML = "";
+  }
+
+  function renderManageList() {
+    const wrap = $("pmList");
+    if (!wrap) return;
+
+    if (!Array.isArray(postsIndex) || postsIndex.length === 0) {
+      wrap.innerHTML = `<div class="card">まだありません</div>`;
+      return;
+    }
+
+    wrap.innerHTML = "";
+    for (const p of postsIndex) {
+      const slug = String(p?.slug || "");
+      if (!slug) continue;
+      const title = String(p?.title || "(無題)");
+      const dt = String(p?.datetime || "");
+      const info = String(p?.info || "");
+      const tags = Array.isArray(p?.tags) ? p.tags.map((t) => String(t || "")).filter(Boolean) : [];
+      const hidden = !!p?.hidden;
+
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <div class="row" style="justify-content:space-between; gap:10px;">
+          <div>
+            <div><strong>${esc(title)}</strong> ${hidden ? `<span class="tag" style="margin-left:6px;">非表示</span>` : ""}</div>
+            <div class="meta" style="margin-top:6px;">
+              <span>${esc(dt)}</span>
+              ${info ? `<span>・ ${esc(info)}</span>` : ""}
+              ${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}
+            </div>
+          </div>
+          <div class="row" style="gap:8px;">
+            <button class="btn ghost" data-pm-copy="${esc(slug)}" type="button">URLコピー</button>
+            <button class="btn ghost" data-pm-del="${esc(slug)}" type="button">削除</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px; gap:8px;">
+          <label class="row" style="gap:8px; margin:0;">
+            <input type="checkbox" data-pm-hide="${esc(slug)}" ${hidden ? "checked" : ""} />
+            <span>一覧に出さない（非表示）</span>
+          </label>
+        </div>
+      `;
+      wrap.appendChild(div);
+    }
+
+    // events
+    wrap.querySelectorAll("input[data-pm-hide]").forEach((el) => {
+      el.addEventListener("change", () => {
+        const slug = el.getAttribute("data-pm-hide") || "";
+        const row = postsIndex.find((x) => String(x?.slug) === String(slug));
+        if (!row) return;
+        row.hidden = !!el.checked;
+        showPmMsg("ok", "変更しました。必要なら『一覧ファイルをダウンロード』してアップロードしてください");
+        // 表示更新（非表示タグの反映）
+        renderManageList();
+      });
+    });
+
+    wrap.querySelectorAll("button[data-pm-del]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const slug = btn.getAttribute("data-pm-del") || "";
+        if (!slug) return;
+        const ok = confirm("一覧から削除します（記事HTMLファイルは残ります）。続行しますか？");
+        if (!ok) return;
+        postsIndex = postsIndex.filter((x) => String(x?.slug) !== String(slug));
+        showPmMsg("ok", "一覧から削除しました。必要なら『一覧ファイルをダウンロード』してアップロードしてください");
+        renderManageList();
+      });
+    });
+
+    wrap.querySelectorAll("button[data-pm-copy]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const slug = btn.getAttribute("data-pm-copy") || "";
+        if (!slug) return;
+        const url = `${location.origin}/posts/${slug}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          showPmMsg("ok", "URLをコピーしました");
+        } catch {
+          showPmMsg("bad", "コピーに失敗しました（ブラウザの権限を確認）");
+        }
+      });
+    });
+  }
+
+  async function pmReload() {
+    hidePmMsg();
+    await loadPostsIndex();
+    renderManageList();
+  }
+
+  function pmDownload() {
+    hidePmMsg();
+    const jsonText = JSON.stringify(postsIndex, null, 2);
+    const indexHtml = buildPostsIndexHtml(postsIndex);
+    downloadText("posts.json", jsonText, "application/json;charset=utf-8");
+    downloadText("index.html", indexHtml, "text/html;charset=utf-8");
+    showPmMsg("ok", "一覧ファイル（posts.json / index.html）をダウンロードしました");
   }
 
   function buildStaticPostHtml({ title, date, time, info, tags, body, fileName }) {
@@ -181,16 +299,17 @@ const Admin = (() => {
 
   function buildPostsIndexHtml(posts) {
     const arr = Array.isArray(posts) ? posts : [];
+    const visible = arr.filter((p) => p && !p.hidden);
     const tags = Array.from(
       new Set(
-        arr
+        visible
           .flatMap((p) => (Array.isArray(p?.tags) ? p.tags : []))
           .map((t) => String(t || "").trim())
           .filter(Boolean)
       )
     ).sort((a, b) => a.localeCompare(b, "ja"));
 
-    const itemsHtml = arr
+    const itemsHtml = visible
       .map((p) => {
         const slug = String(p?.slug || "").trim();
         if (!slug) return "";
@@ -344,6 +463,7 @@ const Admin = (() => {
     const time = $("st_time")?.value || "";
     const info = $("st_info")?.value?.trim() || "";
     const tags = splitTags($("st_tags")?.value || "");
+    const hidden = !!$("st_hidden")?.checked;
     const body = $("st_body")?.value || "";
 
     if (!title || !date || !time || !body.trim()) {
@@ -351,7 +471,7 @@ const Admin = (() => {
     }
 
     const fileName = buildFileName(date, time);
-    const html = buildStaticPostHtml({ title, date, time, info, tags, body, fileName });
+    const html = buildStaticPostHtml({ title, date, time, info, tags, body, fileName, hidden });
     downloadText(fileName, html, "text/html;charset=utf-8");
     showStMsg("ok", `記事HTMLをダウンロードしました（${esc(fileName)}）`);
   }
@@ -363,6 +483,7 @@ const Admin = (() => {
     const time = $("st_time")?.value || "";
     const info = $("st_info")?.value?.trim() || "";
     const tags = splitTags($("st_tags")?.value || "");
+    const hidden = !!$("st_hidden")?.checked;
     const body = $("st_body")?.value || "";
 
     if (!title || !date || !time || !body.trim()) {
@@ -371,7 +492,7 @@ const Admin = (() => {
 
     await loadPostsIndex();
     const fileName = buildFileName(date, time);
-    const entry = toEntry({ fileName, title, date, time, info, tags, body });
+    const entry = toEntry({ fileName, title, date, time, info, tags, body, hidden });
     postsIndex = upsertEntry(postsIndex, entry);
 
     const jsonText = JSON.stringify(postsIndex, null, 2);
@@ -553,10 +674,17 @@ const Admin = (() => {
     on("stDownloadPost", "click", () => stDownloadPost());
     on("stDownloadIndex", "click", () => stDownloadIndex());
 
+    // manage
+    on("pmReload", "click", () => pmReload());
+    on("pmDownload", "click", () => pmDownload());
+
     // inbox
     on("inboxReload", "click", () => loadInbox());
 
-    loadPostsIndex().then(() => renderStaticPreview());
+    loadPostsIndex().then(() => {
+      renderStaticPreview();
+      renderManageList();
+    });
     loadInbox();
   }
 

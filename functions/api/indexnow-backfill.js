@@ -106,6 +106,7 @@ export async function onRequest(context) {
 
   const posts = await loadStaticPosts(origin);
   const slugs = posts
+    .filter((p) => p && p.slug && !p.hidden)
     .map((p) => String(p?.slug || "").trim())
     .filter(Boolean)
     .slice(0, limit);
