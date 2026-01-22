@@ -129,7 +129,7 @@ const Admin = (() => {
 
   // 一覧の管理UI（非表示／削除）
   function renderPostsManage() {
-    const box = id("stManage");
+    const box = document.getElementById("stManage");
     if (!box) return;
 
     box.innerHTML = "";
@@ -195,7 +195,7 @@ const Admin = (() => {
       btnHide.addEventListener("click", () => {
         postsIndex = postsIndex.map(p => (p.slug === it.slug ? { ...p, hidden: !p.hidden } : p));
         renderPostsManage();
-        showStMsg("ok", "一覧を更新しました。必要なら posts.json をダウンロードしてアップロードしてください。", 3000);
+        showStMsg("ok", "一覧を更新しました。必要なら posts.json をダウンロードしてアップロードしてください。");
       });
 
       const btnDel = document.createElement("button");
@@ -207,7 +207,7 @@ const Admin = (() => {
         if (!ok) return;
         postsIndex = postsIndex.filter(p => p.slug !== it.slug);
         renderPostsManage();
-        showStMsg("ok", "一覧から削除しました。必要なら posts.json をダウンロードしてアップロードしてください。", 4000);
+        showStMsg("ok", "一覧から削除しました。必要なら posts.json をダウンロードしてアップロードしてください。");
       });
 
       right.appendChild(btnHide);
