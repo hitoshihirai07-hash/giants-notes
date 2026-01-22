@@ -72,7 +72,12 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .preview { color: var(--fg); line-height: 1.9; }
 .preview p { margin: 0 0 10px; }
 
-.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
 .nav a { color: var(--muted); text-decoration: none; font-size: 13px; }
 .nav a:hover { color: var(--fg); text-decoration: underline; }
 
@@ -113,4 +118,14 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   .calGrid{ gap:6px; }
   .calCell{ min-height:80px; padding:7px; }
   .calMini{ font-size:11px; }
+}
+
+
+/* responsive head fix */
+@media (max-width: 520px){
+  .head{ flex-direction: column; align-items: flex-start; gap: 8px; }
+  .nav{ gap: 10px; }
+  .controls{ flex-direction: column; align-items: stretch; }
+  .controls .input{ width: 100%; }
+  .tabs{ flex-wrap: wrap; }
 }
