@@ -4,50 +4,41 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="読売ジャイアンツのメモと成績まとめ。" />
-  <link rel="canonical" href="https://giants-notes.pages.dev/" />
-
+  <meta name="description" content="読売ジャイアンツの良かった場面を記録する個人メモサイト。" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#f7f7f7" />
-
-  <meta name="robots" content="index,follow" />
-  <link rel="stylesheet" href="/assets/style.css" />
-  <script src="/assets/seo.js" defer></script>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script src="./assets/seo.js" defer></script>
 </head>
 <body>
   <header class="wrap">
-    <h1>読売ジャイアンツ 良かったところメモ</h1>
-    <nav class="nav" style="margin-top:8px;">
-      <a href="/posts/">メモ一覧</a>
-      <a href="/stats">成績・試合結果</a>
-      <a href="/about">このサイトについて</a>
-      <a href="/contact">お問い合わせ</a>
-    </nav>
+    <div class="head">
+      <h1>読売ジャイアンツ 良かったところメモ</h1>
+      <nav class="nav"><a href="./stats">成績・試合結果</a>
+        <a href="./about">このサイトについて</a></nav>
+    </div>
+
+    <div class="controls">
+      <input id="q" class="input" placeholder="検索（選手名/用語/タイトル）" autocomplete="off" />
+      <select id="tag" class="input">
+        <option value="">タグ：全部</option>
+      </select>
+    </div>
   </header>
 
-  <main class="wrap" style="margin-top:12px;">
-    <div class="grid2">
-      <a class="card" href="/posts/" style="text-decoration:none; color:inherit;">
-        <h2 class="h2" style="margin:0 0 6px;">メモを見る</h2>
-        <p class="hint" style="margin:0;">投稿したメモを一覧で見ます。</p>
-      </a>
-      <a class="card" href="/stats" style="text-decoration:none; color:inherit;">
-        <h2 class="h2" style="margin:0 0 6px;">成績・試合結果</h2>
-        <p class="hint" style="margin:0;">順位・個人成績・試合結果を確認できます。</p>
-      </a>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <p style="margin:0;">最新のメモは <a href="/posts/">メモ一覧</a> からどうぞ。</p>
-    </div>
+  <main class="wrap">
+    <div id="state" class="state" hidden></div>
+    <div id="list" class="list" hidden></div>
   </main>
 
   <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="./about">このサイトについて</a></small>
   </footer>
+
+  <script src="./assets/app.js"></script>
 </body>
 </html>

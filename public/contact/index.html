@@ -4,34 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>お問い合わせ | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="ご意見・ご連絡はこちらから送信できます（Turnstile認証あり）。" />
-  <meta name="robots" content="noindex,nofollow" />
-  <link rel="icon" href="/favicon.ico" />
+  <meta name="description" content="サイトへの連絡用フォームです。" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <meta name="theme-color" content="#f7f7f7" />
   <link rel="stylesheet" href="/assets/style.css" />
-  <style>
-    .msg{ padding:10px 12px; border-radius:12px; margin:10px 0; }
-    .msg.ok{ background:#ecfdf3; border:1px solid #bbf7d0; }
-    .msg.bad{ background:#fff7ed; border:1px solid #fed7aa; }
-    .row{ display:flex; gap:10px; }
-    .row > *{ flex:1; }
-    .label{ font-size:13px; color:#4b5563; }
-    .textarea{ min-height:140px; }
-    .hp{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
-  </style>
 </head>
 <body>
   <header class="wrap">
-    <div class="head">
-      <div>
-        <a class="back" href="/">← トップ</a>
-        <h1>お問い合わせ</h1>
-        <p class="sub">内容は必ず採用とは限りませんが、参考にします。</p>
+    <div class="nav">
+      <div><h1>お問い合わせ</h1><p class="sub">要望・誤りの連絡などはこちらへ。</p></div>
+      <div class="nav-links">
+        <a class="btn" href="/">メモ一覧</a>
+        <a class="btn" href="/about">このサイトについて</a>
       </div>
-      <nav class="nav">
-        <a href="/posts/">メモ一覧</a>
-        <a href="/stats">成績・試合結果</a>
-        <a href="/about">このサイトについて</a>
-      </nav>
     </div>
   </header>
 
@@ -39,36 +24,24 @@
     <div id="contactMsg" class="msg" hidden></div>
 
     <form id="contactForm" class="card">
-      <div class="row">
-        <div>
-          <div class="label">お名前（任意）</div>
-          <input id="cName" class="input" placeholder="例：ソラ" maxlength="80" />
-        </div>
-        <div>
-          <div class="label">返信先（任意）</div>
-          <input id="cReply" class="input" placeholder="例：ThreadsのURL / メール等" maxlength="200" />
-        </div>
-      </div>
+      <label class="label" for="cName">お名前（任意）</label>
+      <input id="cName" class="input full" autocomplete="name" />
 
-      <div style="margin-top:10px;">
-        <div class="label">内容（必須）</div>
-        <textarea id="cBody" class="input textarea" placeholder="例：誤字の連絡、追加してほしい内容など"></textarea>
-      </div>
+      <label class="label" for="cReply">返信先（任意）</label>
+      <input id="cReply" class="input full" autocomplete="email" placeholder="メール / X / Threads など" />
 
-      <!-- honeypot（ボット対策） -->
-      <div class="hp" aria-hidden="true">
-        <label>Website<input id="cWebsite" autocomplete="off" /></label>
-      </div>
+      <label class="label" for="cBody">内容（必須）</label>
+      <textarea id="cBody" class="input full" rows="8" placeholder="例：誤字、データの差分、要望など"></textarea>
 
-      <div style="margin-top:12px;">
-        <div id="cfTurnstile"></div>
-        <p class="hint" style="margin-top:8px;">※送信には認証が必要です。<a href="/policy.html">プライバシーポリシー</a>もご確認ください。</p>
-      </div>
+      <!-- bot 対策（表示しない） -->
+      <input id="cWebsite" class="input full" style="display:none" tabindex="-1" autocomplete="off" />
 
-      <div style="display:flex; gap:10px; margin-top:12px;">
-        <button class="btn" type="submit">送信</button>
-        <button id="cClear" class="btn ghost" type="button">クリア</button>
-      </div>
+      <div class="hr"></div>
+
+      <div id="turnstile" class="ts"></div>
+
+      <button id="contactSubmit" class="btn primary" type="submit">送信</button>
+      <div class="sub">送信内容は参考にしますが、すべて反映されるとは限りません。</div>
     </form>
   </main>
 
@@ -76,7 +49,6 @@
     <small>© 読売ジャイアンツ 良かったところメモ</small>
   </footer>
 
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
   <script src="/assets/contact.js" defer></script>
 </body>
 </html>

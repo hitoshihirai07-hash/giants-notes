@@ -5,7 +5,7 @@ const $ = (id) => document.getElementById(id);
 const DS = {
   games: {
     label: "試合結果",
-    path: "/data/games.csv",
+    path: "./data/games.csv",
     // 表示順を固定
     cols: ["年月日","曜日","対戦球団","スコア","先発投手"],
     hideIfEmpty: ["対戦球団"],
@@ -14,20 +14,20 @@ const DS = {
   calendar: {
     label: "カレンダー",
     // 表示は games.csv を使う（中身は JS 側でカレンダー描画）
-    path: "/data/games.csv",
+    path: "./data/games.csv",
     isCalendar: true
   },
   standings: {
     label: "順位",
-    path: "/data/standings.csv"
+    path: "./data/standings.csv"
   },
   batters: {
     label: "打者",
-    path: "/data/batters.csv"
+    path: "./data/batters.csv"
   },
   pitchers: {
     label: "投手",
-    path: "/data/pitchers.csv"
+    path: "./data/pitchers.csv"
   }
 };
 
@@ -148,12 +148,12 @@ function buildCalendarModel(gameRows) {
 function renderCalendar(model, state, els) {
   const { calWrap, calGrid, calMonth, calPrev, calNext, statsInfo, stateEl } = els;
   if (!model || !model.months?.length) {
-    if (statsInfo) hide(statsInfo);
+    if (statsInfo) statsInfo.hidden = true;
     if (stateEl) {
       stateEl.textContent = "データがありません";
-      show(stateEl);
+      stateEl.hidden = false;
     }
-    hide(calWrap);
+    if (calWrap) calWrap.hidden = true;
     return;
   }
 
@@ -407,19 +407,6 @@ async function main() {
     calModel: null
   };
 
-
-  const show = (el) => {
-    if (!el) return;
-    el.hidden = false;
-    el.style.display = "";
-  };
-
-  const hide = (el) => {
-    if (!el) return;
-    el.hidden = true;
-    el.style.display = "none";
-  };
-
   // 規定値を計算（games.csv の試合数を使う）
   async function ensureQualThresholds() {
     try {
@@ -575,9 +562,9 @@ async function main() {
     try {
       if (showLoading) {
         stateEl.textContent = "読み込み中…";
-        show(stateEl);
-        hide(wrap);
-        hide(calWrap);
+        stateEl.hidden = false;
+        wrap.hidden = true;
+        if (calWrap) calWrap.hidden = true;
       }
 
       // カレンダーは games.csv を読んでカレンダー描画
@@ -585,10 +572,10 @@ async function main() {
         const g = await loadObjects("games");
         state.calModel = buildCalendarModel(g.data);
 
-        hide(stateEl);
-        hide(wrap);
-        show(calWrap);
-        if (statsInfo) hide(statsInfo);
+        stateEl.hidden = true;
+        wrap.hidden = true;
+        if (calWrap) calWrap.hidden = false;
+        if (statsInfo) statsInfo.hidden = true;
 
         renderCalendar(state.calModel, state, calEls);
         return;
@@ -600,17 +587,17 @@ async function main() {
       // extra controls
       syncExtraControls(state.tab, payload.header, payload.data);
 
-      hide(stateEl);
-      show(wrap);
-      hide(calWrap);
+      stateEl.hidden = true;
+      wrap.hidden = false;
+      if (calWrap) calWrap.hidden = true;
 
       renderTable({ key: state.tab, ...payload }, state);
     } catch (e) {
       stateEl.textContent = `読み込み失敗: ${e.message}`;
-      show(stateEl);
-      hide(wrap);
-      hide(calWrap);
-      if (statsInfo) hide(statsInfo);
+      stateEl.hidden = false;
+      wrap.hidden = true;
+      if (calWrap) calWrap.hidden = true;
+      if (statsInfo) statsInfo.hidden = true;
     }
   }
 

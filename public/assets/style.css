@@ -106,23 +106,3 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   .calCell{ min-height:80px; padding:7px; }
   .calMini{ font-size:11px; }
 }
-
-/* ---- layout helpers (トップ/管理画面の崩れ対策) ---- */
-.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-.grid3{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
-@media (max-width: 760px){
-  .grid2{ grid-template-columns: 1fr; }
-  .grid3{ grid-template-columns: 1fr; }
-}
-.grid2 > *, .grid3 > *{ min-width: 0; }
-
-/* a.card が inline のままだと中身が崩れるので block に固定 */
-.card{ display:block; }
-
-/* ナビは折り返し前提で並べる */
-.nav{ display:flex; gap:12px; flex-wrap:wrap; }
-
-/* フォーム系 */
-.input.full{ flex: 1; }
-.textarea{ min-height: 160px; resize: vertical; }
-.hp{ position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }

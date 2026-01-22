@@ -1,222 +1,136 @@
 function htmlResponse(body, init = {}) {
   const headers = new Headers(init.headers || {});
   headers.set("content-type", "text/html; charset=utf-8");
-  headers.set("cache-control", "no-store");
+  headers.set("cache-control", "public, max-age=60");
   return new Response(body, { ...init, headers });
 }
 
 function esc(s) {
   return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-// Minimal but robust CSV parser (supports quotes/newlines)
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let inQuotes = false;
+function parseCsv(text) {
+  const lines = String(text || "").split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return { header: [], rows: [] };
 
-  const pushCell = () => {
-    row.push(cell);
-    cell = "";
+  const split = (line) => {
+    // 簡易CSV（このサイトのデータはカンマ区切り＋クォート無し前提）
+    // クォートを使う場合は csv.js 側に寄せる
+    return line.split(",").map(s => s.trim());
   };
 
-  const pushRow = () => {
-    // ignore completely empty trailing row
-    if (row.length === 1 && row[0] === "") {
-      row = [];
-      return;
-    }
-    rows.push(row);
-    row = [];
-  };
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-
-    if (inQuotes) {
-      if (ch === '"') {
-        const next = text[i + 1];
-        if (next === '"') {
-          cell += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        cell += ch;
-      }
-      continue;
-    }
-
-    if (ch === '"') {
-      inQuotes = true;
-      continue;
-    }
-
-    if (ch === ",") {
-      pushCell();
-      continue;
-    }
-
-    if (ch === "\n") {
-      pushCell();
-      pushRow();
-      continue;
-    }
-
-    if (ch === "\r") {
-      // ignore CR (handle CRLF)
-      continue;
-    }
-
-    cell += ch;
-  }
-
-  // last cell/row
-  pushCell();
-  pushRow();
-
-  return rows;
+  const header = split(lines[0]);
+  const rows = lines.slice(1).map(split);
+  return { header, rows };
 }
 
-async function loadCSV(origin, path) {
-  const res = await fetch(`${origin}${path}?ts=${Date.now()}`, {
-    headers: { "cache-control": "no-store" }
-  });
-  if (!res.ok) throw new Error(`CSV取得に失敗しました（${res.status}）`);
-  const text = await res.text();
-  const rows = parseCSV(text);
-  return rows;
+function pickRecentAndNext(rows) {
+  // columns: 年月日,曜日,対戦球団,スコア,先発投手
+  const played = rows.filter(r => (r[2] || "").trim() && (r[3] || "").trim());
+  const planned = rows.filter(r => (r[2] || "").trim() && !(r[3] || "").trim());
+
+  const recent = played.slice(-7).reverse();
+  const next = planned.slice(0, 7);
+  return { recent, next };
 }
 
-function renderTable(header, rows, pickCols = null) {
-  const cols = pickCols && pickCols.length ? pickCols : header;
-  const idx = new Map(header.map((h, i) => [h, i]));
-
-  const thead = `<thead><tr>${cols.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead>`;
-
-  const tbodyRows = rows.map((r) => {
-    const tds = cols.map((h) => {
-      const i = idx.get(h);
-      const v = i == null ? "" : (r[i] ?? "");
-      // newline -> <br>
-      const vv = String(v).replace(/\r\n?/g, "\n").replace(/\n/g, "<br>");
-      return `<td>${vv ? esc(vv).replaceAll("&lt;br&gt;", "<br>") : ""}</td>`;
-    }).join("");
-    return `<tr>${tds}</tr>`;
+function table(title, rows) {
+  if (!rows.length) return `<div class="card"><div class="h2">${esc(title)}</div><div class="sub">該当データがありません。</div></div>`;
+  const trs = rows.map(r => {
+    const date = esc(r[0] || "");
+    const opp = esc(r[2] || "");
+    const score = esc(r[3] || "");
+    const sp = esc(r[4] || "");
+    return `<tr><td>${date}</td><td>${opp}</td><td>${score}</td><td>${sp}</td></tr>`;
   }).join("");
-
-  return `${thead}<tbody>${tbodyRows}</tbody>`;
+  return `
+    <div class="card">
+      <div class="h2">${esc(title)}</div>
+      <table class="tbl">
+        <thead><tr><th>年月日</th><th>対戦相手</th><th>結果</th><th>先発</th></tr></thead>
+        <tbody>${trs}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 export async function onRequest(context) {
-  if (context.request.method !== "GET") {
-    return htmlResponse("", { status: 405 });
-  }
-
-  const reqUrl = new URL(context.request.url);
-  const origin = reqUrl.origin;
-
-  let games = { header: [], rows: [], error: "" };
-
   try {
-    const rows = await loadCSV(origin, "/data/games.csv");
-    const header = rows[0] || [];
-    const data = rows.slice(1).filter((r) => r.some((v) => String(v ?? "").trim() !== ""));
-    games = { header, rows: data, error: "" };
-  } catch (e) {
-    games.error = String(e?.message || e);
-  }
+    if (context.request.method !== "GET") return htmlResponse("", { status: 405 });
 
-  const pick = ["年月日", "曜日", "対戦球団", "スコア", "先発投手"];
-  const tblHtml = games.error
-    ? `<div class="state">読み込み失敗: ${esc(games.error)}</div>`
-    : `<div class="tableScroll"><table id="tbl" class="tbl">${renderTable(games.header, games.rows, pick)}</table></div>`;
+    // games.csv を静的アセットから取得
+    const reqUrl = new URL(context.request.url);
+    const csvRes = await context.env.ASSETS.fetch(new Request(reqUrl.origin + "/data/games.csv"));
+    const csvText = await csvRes.text();
 
-  const html = `<!doctype html>
+    const { rows } = parseCsv(csvText);
+    const { recent, next } = pickRecentAndNext(rows);
+
+    const body = `<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>成績・試合結果 | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="読売ジャイアンツの試合結果・順位・個人成績を一覧表示。検索できます。" />
+  <meta name="description" content="試合結果・順位・個人成績をまとめて確認できます。" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#f7f7f7" />
   <link rel="stylesheet" href="/assets/style.css" />
-  <script src="/assets/seo.js" defer></script>
 </head>
 <body>
   <header class="wrap">
-    <div class="head">
-      <h1>成績・試合結果</h1>
-      <nav class="nav">
-        <a href="/">トップ</a>
-        <a href="/posts/">メモ一覧</a>
-        <a href="/about">このサイトについて</a>
-      </nav>
-    </div>
-
-    <div class="tabs" role="tablist" aria-label="成績タブ">
-      <button class="tabbtn" data-tab="games" type="button">試合結果</button>
-      <button class="tabbtn" data-tab="calendar" type="button">カレンダー</button>
-      <button class="tabbtn" data-tab="standings" type="button">順位</button>
-      <button class="tabbtn" data-tab="batters" type="button">打者</button>
-      <button class="tabbtn" data-tab="pitchers" type="button">投手</button>
-    </div>
-
-    <div class="controls" style="margin-top:10px;">
-      <input id="statsQ" class="input" placeholder="検索（選手名・相手・数字など）" autocomplete="off" />
-      <select id="opp" class="input" hidden>
-        <option value="">対戦相手：全部</option>
-      </select>
-
-      <div class="row" id="statsExtra" style="margin-top:8px;">
-        <button id="qualBtn" class="btn" type="button" hidden>規定到達者のみ</button>
-        <select id="sortSel" class="input" style="min-width: 180px;" hidden>
-          <option value="">並び替え：なし</option>
-        </select>
-        <button id="sortDirBtn" class="btn" type="button" hidden>大きい順</button>
-        <button id="sortClearBtn" class="btn" type="button" hidden>解除</button>
+    <div class="nav">
+      <div>
+        <h1>成績・試合結果</h1>
       </div>
+      <div class="nav-links">
+        <a class="btn" href="/">メモ一覧</a>
+        <a class="btn" href="/about">このサイトについて</a>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <a class="tab on" href="#games">試合結果</a>
+      <a class="tab" href="#calendar">カレンダー</a>
+      <a class="tab" href="#standings">順位</a>
+      <a class="tab" href="#batters">打者</a>
+      <a class="tab" href="#pitchers">投手</a>
     </div>
   </header>
 
   <main class="wrap">
-    <div id="statsState" class="state" hidden></div>
-    <div id="statsInfo" class="meta" hidden></div>
+    <section id="games">
+      ${table("最近7試合", recent)}
+      ${table("今後1週間", next)}
+    </section>
 
-    <div id="tableWrap" class="card">
-      ${tblHtml}
-    </div>
+    <div id="state" class="state" hidden></div>
 
-    <div id="calendarWrap" class="card" hidden>
-      <div class="calTop">
-        <button id="calPrev" class="btn" type="button">前の月</button>
-        <div id="calMonth" class="calMonth">-</div>
-        <button id="calNext" class="btn" type="button">次の月</button>
-      </div>
-      <div id="calHint" class="meta" style="margin-top:6px;">月を切り替えて試合結果を確認できます（対戦相手／結果／先発）。</div>
-      <div id="calGrid" class="calGrid" style="margin-top:10px;"></div>
+    <!-- 既存のJSで、カレンダー/順位/個人成績などを表示 -->
+    <div id="appStats" class="card" style="margin-top: 12px;">
+      <div class="sub">詳細表示は読み込み後に反映されます。</div>
     </div>
   </main>
 
   <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/">メモ一覧</a></small>
   </footer>
 
-  <script type="module" src="/assets/stats.js"></script>
+  <script src="/assets/stats.js" defer></script>
 </body>
 </html>`;
-
-  return htmlResponse(html);
+    return htmlResponse(body);
+  } catch (e) {
+    const msg = esc(String(e?.message || e));
+    const body = `<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>成績・試合結果</title><link rel="stylesheet" href="/assets/style.css">
+<body class="wrap"><h1>成績・試合結果</h1><div class="card"><div class="sub">表示に失敗しました：${msg}</div></div><p><a class="btn" href="/">メモ一覧へ</a></p></body></html>`;
+    return htmlResponse(body, { status: 500 });
+  }
 }

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "include": [
+    "/",
+    "/post*",
+    "/posts*",
+    "/stats*",
+    "/api*",
+    "/sitemap.xml"
+  ],
+  "exclude": [
+    "/assets/*",
+    "/data/*",
+    "/*.png",
+    "/*.ico",
+    "/site.webmanifest",
+    "/favicon*",
+    "/robots.txt",
+    "/ads.txt",
+    "/*.txt"
+  ]
+}
