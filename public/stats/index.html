@@ -1,80 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>成績・試合結果 | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="description" content="読売ジャイアンツの試合結果・順位・個人成績を一覧表示。検索できます。" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#f7f7f7" />
-  <link rel="stylesheet" href="/assets/style.css" />
-  <script src="/assets/seo.js" defer></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>成績・試合結果 | 読売ジャイアンツ 良かったところメモ</title>
+<meta content="読売ジャイアンツの試合結果・順位・個人成績を一覧表示。検索できます。" name="description"/><link href="https://giants-notes.pages.dev/stats" rel="canonical"/>
+<link href="/favicon.ico" rel="icon" sizes="any"/>
+<link href="/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="/site.webmanifest" rel="manifest"/>
+<meta content="#f7f7f7" name="theme-color"/>
+<link href="/assets/style.css" rel="stylesheet"/>
+<script defer="" src="/assets/seo.js"></script>
 </head>
 <body>
-  <header class="wrap">
-    <div class="head">
-      <h1>成績・試合結果</h1>
-      <nav class="nav">
-        <a href="/">トップ</a>
-        <a href="/posts/">メモ一覧</a>
-        <a href="/about">このサイトについて</a>
-      </nav>
-    </div>
-
-    <div class="tabs" role="tablist" aria-label="成績タブ">
-      <button class="tabbtn" data-tab="games" type="button">試合結果</button>
-      <button class="tabbtn" data-tab="calendar" type="button">カレンダー</button>
-      <button class="tabbtn" data-tab="standings" type="button">順位</button>
-      <button class="tabbtn" data-tab="batters" type="button">打者</button>
-      <button class="tabbtn" data-tab="pitchers" type="button">投手</button>
-    </div>
-
-    <div class="controls" style="margin-top:10px;">
-      <input id="statsQ" class="input" placeholder="検索（選手名・相手・数字など）" autocomplete="off" />
-      <select id="opp" class="input" hidden>
-        <option value="">対戦相手：全部</option>
-      </select>
-
-      <div class="row" id="statsExtra" style="margin-top:8px;">
-        <button id="qualBtn" class="btn" type="button" hidden>規定到達者のみ</button>
-        <select id="sortSel" class="input" style="min-width: 180px;" hidden>
-          <option value="">並び替え：なし</option>
-        </select>
-        <button id="sortDirBtn" class="btn" type="button" hidden>大きい順</button>
-        <button id="sortClearBtn" class="btn" type="button" hidden>解除</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <div id="statsState" class="state">読み込み中…</div>
-    <div id="statsInfo" class="meta" hidden></div>
-    <div id="tableWrap" class="card" hidden>
-      <div class="tableScroll">
-        <table id="tbl" class="tbl"></table>
-      </div>
-    </div>
-
-    <div id="calendarWrap" class="card" hidden>
-      <div class="calTop">
-        <button id="calPrev" class="btn" type="button">前の月</button>
-        <div id="calMonth" class="calMonth">-</div>
-        <button id="calNext" class="btn" type="button">次の月</button>
-      </div>
-      <div id="calHint" class="meta" style="margin-top:6px;">月を切り替えて試合結果を確認できます（対戦相手／結果／先発）。</div>
-      <div id="calGrid" class="calGrid" style="margin-top:10px;"></div>
-    </div>
-
-  </main>
-
-  <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/">トップ</a></small>
-  </footer>
-
-  <script type="module" src="/assets/stats.js"></script>
+<header class="wrap">
+<div class="head">
+<h1>成績・試合結果</h1>
+<nav class="nav">
+<a href="/">トップ</a>
+<a href="/posts/">メモ一覧</a>
+<a href="/about">このサイトについて</a>
+</nav>
+</div>
+<div aria-label="成績タブ" class="tabs" role="tablist">
+<button class="tabbtn" data-tab="games" type="button">試合結果</button>
+<button class="tabbtn" data-tab="calendar" type="button">カレンダー</button>
+<button class="tabbtn" data-tab="standings" type="button">順位</button>
+<button class="tabbtn" data-tab="batters" type="button">打者</button>
+<button class="tabbtn" data-tab="pitchers" type="button">投手</button>
+</div>
+<div class="controls" style="margin-top:10px;">
+<input autocomplete="off" class="input" id="statsQ" placeholder="検索（選手名・相手・数字など）"/>
+<select class="input" hidden="" id="opp">
+<option value="">対戦相手：全部</option>
+</select>
+<div class="row" id="statsExtra" style="margin-top:8px;">
+<button class="btn" hidden="" id="qualBtn" type="button">規定到達者のみ</button>
+<select class="input" hidden="" id="sortSel" style="min-width: 180px;">
+<option value="">並び替え：なし</option>
+</select>
+<button class="btn" hidden="" id="sortDirBtn" type="button">大きい順</button>
+<button class="btn" hidden="" id="sortClearBtn" type="button">解除</button>
+</div>
+</div>
+</header>
+<main class="wrap"><div class="card" id="statsStaticInfo"><h2 style="margin:0 0 8px; font-size:16px;">このページについて</h2><p style="margin:0 0 10px;">読売ジャイアンツの試合結果・順位・個人成績を、見返しやすい形でまとめています。</p><ul style="margin:0; padding-left:18px;"><li>上部のタブで「試合結果 / 順位 / 打者 / 投手 / カレンダー」を切り替えできます。</li><li>表示データは公開情報を参考に整理しており、誤りがあればお問い合わせから連絡できます。</li><li>うまく表が出ない場合でも、下のCSV（生データ）から確認できます。</li></ul><div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"><a class="tag" href="/data/games.csv">試合結果CSV</a><a class="tag" href="/data/standings.csv">順位CSV</a><a class="tag" href="/data/batters.csv">打者CSV</a><a class="tag" href="/data/pitchers.csv">投手CSV</a></div></div>
+<div class="state" hidden="hidden" id="statsState">読み込み中…</div>
+<div class="meta" hidden="" id="statsInfo"></div>
+<div class="card" hidden="" id="tableWrap">
+<div class="tableScroll">
+<table class="tbl" id="tbl"></table>
+</div>
+</div>
+<div class="card" hidden="" id="calendarWrap">
+<div class="calTop">
+<button class="btn" id="calPrev" type="button">前の月</button>
+<div class="calMonth" id="calMonth">-</div>
+<button class="btn" id="calNext" type="button">次の月</button>
+</div>
+<div class="meta" id="calHint" style="margin-top:6px;">月を切り替えて試合結果を確認できます（対戦相手／結果／先発）。</div>
+<div class="calGrid" id="calGrid" style="margin-top:10px;"></div>
+</div>
+</main>
+<footer class="wrap foot">
+<small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/">トップ</a></small>
+</footer>
+<script src="/assets/stats.js" type="module"></script>
 </body>
 </html>
