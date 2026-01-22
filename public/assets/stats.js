@@ -5,7 +5,7 @@ const $ = (id) => document.getElementById(id);
 const DS = {
   games: {
     label: "試合結果",
-    path: "./data/games.csv",
+    path: "/data/games.csv",
     // 表示順を固定
     cols: ["年月日","曜日","対戦球団","スコア","先発投手"],
     hideIfEmpty: ["対戦球団"],
@@ -14,20 +14,20 @@ const DS = {
   calendar: {
     label: "カレンダー",
     // 表示は games.csv を使う（中身は JS 側でカレンダー描画）
-    path: "./data/games.csv",
+    path: "/data/games.csv",
     isCalendar: true
   },
   standings: {
     label: "順位",
-    path: "./data/standings.csv"
+    path: "/data/standings.csv"
   },
   batters: {
     label: "打者",
-    path: "./data/batters.csv"
+    path: "/data/batters.csv"
   },
   pitchers: {
     label: "投手",
-    path: "./data/pitchers.csv"
+    path: "/data/pitchers.csv"
   }
 };
 
@@ -516,6 +516,10 @@ async function main() {
     document.querySelectorAll(".tabbtn").forEach(btn => {
       btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
     });
+
+    // Functions(SSR)で出している簡易カードは「試合結果」タブだけに出す
+    const ssrCards = document.getElementById("ssrCards");
+    if (ssrCards) ssrCards.hidden = (tab !== "games");
 
     const isCalendar = tab === "calendar";
 
