@@ -1,0 +1,7 @@
+# メモ一覧が「更新されない」対策：キャッシュを抑制
+/posts/posts.json
+  Cache-Control: no-store
+
+# 成績CSVも頻繁に差し替える前提なのでキャッシュを抑制
+/data/*.csv
+  Cache-Control: no-store

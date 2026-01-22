@@ -82,21 +82,19 @@
             <button id="stDownloadPost" class="btn" type="button">記事HTMLをダウンロード</button>
             <button id="stLoadIndex" class="btn ghost" type="button">既存の一覧を読み込む</button>
             <button id="stDownloadIndex" class="btn" type="button">posts.json をダウンロード</button>
-            <button id="stDownloadPostsIndexHtml" class="btn" type="button">メモ一覧（index.html）をダウンロード</button>
           </div>
           <p class="hint">
             手順：<br>
             ①「記事HTML」をダウンロード<br>
             ②「posts.json」をダウンロード（必要なら「既存の一覧を読み込む」→ 非表示/削除もここで）<br>
             ③ GitHub の <b>public/posts/</b> に記事HTMLをアップロード<br>
-            ④ <b>public/posts/posts.json</b> を上書きして push（自動でデプロイ）<br>
-            ⑤「メモ一覧（index.html）」も必要なら更新して <b>public/posts/index.html</b> を上書き
+            ④ <b>public/posts/posts.json</b> を上書きして push（自動でデプロイ）
           </p>
 
           <div style="margin-top:12px;">
             <h3 class="h2" style="margin:0 0 8px;">メモ管理（非表示／削除）</h3>
             <div id="stManage" class="list"></div>
-            <p class="hint" style="margin:8px 0 0;">※「削除」は一覧から外すだけです（記事HTMLは残ります）。不要なら <b>public/posts/</b> からHTMLを削除してください。</p>
+            <p class="hint" style="margin:8px 0 0;">※「削除」は一覧から外すだけです（記事HTMLは残るので、必要なら後で戻せます）。</p>
           </div>
         </form>
       </div>

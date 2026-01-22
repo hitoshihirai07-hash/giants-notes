@@ -3,33 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>メモを開く | 読売ジャイアンツ 良かったところメモ</title>
-  <meta name="robots" content="noindex,nofollow" />
-  <link rel="stylesheet" href="/assets/style.css" />
+  <title>記事 | 読売ジャイアンツ 良かったところメモ</title>
+  <meta name="description" content="記事ページ。読売ジャイアンツの良かった場面メモです。" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#f7f7f7" />
+  <meta name="robots" content="index,follow" />
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script src="./assets/seo.js" defer></script>
 </head>
 <body>
-  <main class="wrap" style="padding-top:28px;">
-    <h1>メモを開いています…</h1>
-    <p class="hint" id="msg">移動できない場合は、<a href="/posts/">メモ一覧</a>から開いてください。</p>
+  <header class="wrap">
+    <a class="back" href="./">← 一覧へ</a>
+    <h1 id="title">読み込み中…</h1>
+    <div id="meta" class="meta"></div>
+    <nav class="nav" style="margin-top:8px;"><a href="./stats">成績・試合結果</a>
+      <a href="./about">このサイトについて</a></nav>
+</header>
+
+  <main class="wrap">
+    <div id="state" class="state">読み込み中…</div>
+    <article id="body" class="article" hidden></article>
   </main>
 
-  <script>
-  (() => {
-    const p = new URLSearchParams(location.search);
-    let id = (p.get('id') || '').trim();
+  <footer class="wrap foot">
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="./about">このサイトについて</a></small>
+  </footer>
 
-    // 安全対策: パスっぽい文字は除外
-    if (id.includes('/') || id.includes('\\') || id.includes('..')) id = '';
-
-    if (!id) {
-      document.getElementById('msg').textContent = 'IDが指定されていません。メモ一覧から開いてください。';
-      return;
-    }
-
-    if (!id.endsWith('.html')) id += '.html';
-    const url = '/posts/' + encodeURIComponent(id);
-    location.replace(url);
-  })();
-  </script>
+  <script src="./assets/app.js"></script>
 </body>
 </html>

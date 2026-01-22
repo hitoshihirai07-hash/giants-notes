@@ -453,7 +453,15 @@ const Admin = (() => {
     postsIndex = upsertEntry(postsIndex, entry);
     renderPostsManage();
 
-    showStMsg("ok", `記事HTMLをダウンロードしました（${esc(fileName)}）\n次に「posts.jsonをダウンロード」→ public/posts/posts.json にアップロードしてください`);
+    // ここで posts.json も一緒に落とす（忘れがちで「更新されない」原因になりやすい）
+    const jsonText = JSON.stringify(postsIndex, null, 2) + "\n";
+    downloadText("posts.json", jsonText, "application/json;charset=utf-8");
+
+    showStMsg(
+      "ok",
+      `記事HTMLとposts.jsonをダウンロードしました（${esc(fileName)}）\n` +
+        `この2つをまとめて public/posts/ にアップロードしてください。`
+    );
   }
 
   async function stDownloadIndex() {
@@ -468,16 +476,6 @@ const Admin = (() => {
     const jsonText = JSON.stringify(postsIndex, null, 2) + "\n";
     downloadText("posts.json", jsonText, "application/json;charset=utf-8");
     showStMsg("ok", "posts.jsonをダウンロードしました。public/posts/posts.json にアップロードしてください");
-  }
-
-  async function stDownloadPostsIndexHtml() {
-    hideStMsg();
-    await loadPostsIndex();
-
-    // 表示用の一覧HTMLを生成（中身は posts.json と同じ）
-    const html = buildPostsIndexHtml(postsIndex);
-    downloadText("index.html", html, "text/html;charset=utf-8");
-    showStMsg("ok", "メモ一覧（index.html）をダウンロードしました。public/posts/index.html を上書きしてください");
   }
 
   function initTabs() {
@@ -655,7 +653,6 @@ const Admin = (() => {
       showStMsg("ok", "既存の一覧を読み込みました");
     });
     on("stDownloadIndex", "click", () => stDownloadIndex());
-    on("stDownloadPostsIndexHtml", "click", () => stDownloadPostsIndexHtml());
 
     // inbox
     on("inboxReload", "click", () => loadInbox());

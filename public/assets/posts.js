@@ -98,7 +98,9 @@
   async function init() {
     const state = $("state");
     try {
-      const res = await fetch("/posts/posts.json", { cache: "no-store" });
+      // Cloudflare Pages 側・ブラウザ側のキャッシュで「一覧が更新されない」ケースを潰すため、
+      // クエリを付けて毎回最新を取りに行く。
+      const res = await fetch("/posts/posts.json?v=" + Date.now(), { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       raw = parsePosts(json).filter(p => !p.hidden);
