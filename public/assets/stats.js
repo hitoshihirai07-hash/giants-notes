@@ -574,7 +574,8 @@ async function main() {
   async function refresh(showLoading = true) {
     try {
       if (showLoading) {
-        stateEl.textContent = "読み込み中…";
+        // 表示上は何も出さない（止まって見えるのを避ける）
+        stateEl.textContent = "";
         show(stateEl);
         hide(wrap);
         hide(calWrap);
@@ -606,7 +607,8 @@ async function main() {
 
       renderTable({ key: state.tab, ...payload }, state);
     } catch (e) {
-      stateEl.textContent = `読み込み失敗: ${e.message}`;
+      // 画面は空にせず、表示メッセージも出さない（詳細はコンソール）
+      stateEl.textContent = "";
       show(stateEl);
       hide(wrap);
       hide(calWrap);
