@@ -13,17 +13,6 @@
   let raw = [];
   let activeTag = "";
 
-  function readParams() {
-    try {
-      const sp = new URLSearchParams(location.search);
-      const qv = (sp.get("q") || "").trim();
-      const tv = (sp.get("tag") || "").trim();
-      const qEl = document.getElementById("q");
-      if (qv && qEl) qEl.value = qv;
-      if (tv) activeTag = tv;
-    } catch {}
-  }
-
   function parsePosts(json) {
     if (!Array.isArray(json)) return [];
     return json
@@ -108,7 +97,6 @@
 
   async function init() {
     const state = $("state");
-    readParams();
     try {
       const res = await fetch("/posts/posts.json", { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

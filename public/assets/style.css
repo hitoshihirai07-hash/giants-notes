@@ -72,22 +72,9 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .preview { color: var(--fg); line-height: 1.9; }
 .preview p { margin: 0 0 10px; }
 
-.head {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .nav a { color: var(--muted); text-decoration: none; font-size: 13px; }
 .nav a:hover { color: var(--fg); text-decoration: underline; }
-
-/* Functions(SSR)側でヘッダーにボタンを置く時のズレ防止 */
-.navRow{ margin-top: 0; }
-.navRow .btn{ text-decoration: none; }
-
-/* SSRで普通の<th><td>を使う表も崩れないように */
-.tbl th, .tbl td{ border-bottom:1px solid var(--line); padding:8px 8px; vertical-align:top; }
-.tbl th{ text-align:left; position:sticky; top:0; background:var(--card); cursor:pointer; user-select:none; }
 
 /* stats */
 .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
@@ -120,12 +107,22 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
   .calMini{ font-size:11px; }
 }
 
-
-/* responsive head fix */
-@media (max-width: 520px){
-  .head{ flex-direction: column; align-items: flex-start; gap: 8px; }
-  .nav{ gap: 10px; }
-  .controls{ flex-direction: column; align-items: stretch; }
-  .controls .input{ width: 100%; }
-  .tabs{ flex-wrap: wrap; }
+/* ---- layout helpers (トップ/管理画面の崩れ対策) ---- */
+.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.grid3{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+@media (max-width: 760px){
+  .grid2{ grid-template-columns: 1fr; }
+  .grid3{ grid-template-columns: 1fr; }
 }
+.grid2 > *, .grid3 > *{ min-width: 0; }
+
+/* a.card が inline のままだと中身が崩れるので block に固定 */
+.card{ display:block; }
+
+/* ナビは折り返し前提で並べる */
+.nav{ display:flex; gap:12px; flex-wrap:wrap; }
+
+/* フォーム系 */
+.input.full{ flex: 1; }
+.textarea{ min-height: 160px; resize: vertical; }
+.hp{ position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }

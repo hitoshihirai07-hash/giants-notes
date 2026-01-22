@@ -14,29 +14,15 @@ function getAuthToken(req) {
   return "";
 }
 
-function getKvOrThrow(env) {
+function tryGetKv(env) {
   const kv = env?.POSTS;
-  if (!kv) {
-    throw new Error("KV binding 'POSTS' が設定されていません");
-  }
-  if (typeof kv.get !== "function" || typeof kv.put !== "function") {
-    throw new Error("'POSTS' はKVバインディングではありません");
-  }
+  if (!kv) return null;
+  if (typeof kv.get !== "function" || typeof kv.put !== "function") return null;
   return kv;
 }
 
-async function getIndex(kv) {
-  const raw = await kv.get("posts:index");
-  if (!raw) return [];
-  try {
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
-
 async function appendIndexNowLog(kv, entry) {
+  if (!kv) return;
   try {
     const key = "indexnow:log";
     const raw = await kv.get(key);
@@ -72,14 +58,20 @@ async function submitIndexNow({ host, key, keyLocation, urlList }) {
   return { ok: false, status: res.status, body: text.slice(0, 200) };
 }
 
-export async function onRequest(context) {
-  let kv;
+async function loadStaticPosts(origin) {
   try {
-    kv = getKvOrThrow(context.env);
-  } catch (e) {
-    return json({ error: String(e?.message || e) }, { status: 500 });
+    const res = await fetch(`${origin}/posts/posts.json?ts=${Date.now()}`, {
+      headers: { "cache-control": "no-store" }
+    });
+    if (!res.ok) return [];
+    const json = await res.json().catch(() => null);
+    return Array.isArray(json) ? json : [];
+  } catch {
+    return [];
   }
+}
 
+export async function onRequest(context) {
   const req = context.request;
   if (req.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
@@ -99,10 +91,11 @@ export async function onRequest(context) {
   const origin = url.origin;
   const host = url.host;
 
+  const kv = tryGetKv(context.env);
   const force = url.searchParams.get("force") === "1";
   const doneFlagKey = "indexnow:backfill_done";
 
-  if (!force) {
+  if (kv && !force) {
     const done = await kv.get(doneFlagKey);
     if (done === "1") {
       return json({ ok: true, skipped: true, reason: "backfill already done" });
@@ -111,12 +104,15 @@ export async function onRequest(context) {
 
   const limit = Math.max(1, Math.min(1000, Number(url.searchParams.get("limit") || 500)));
 
-  // Collect URLs from current post index
-  const index = await getIndex(kv);
-  const ids = index.map(x => String(x?.id || "").trim()).filter(Boolean);
+  const posts = await loadStaticPosts(origin);
+  const slugs = posts
+    .filter((p) => p && p.slug && !p.hidden)
+    .map((p) => String(p?.slug || "").trim())
+    .filter(Boolean)
+    .slice(0, limit);
 
-  const postUrls = ids.slice(0, limit).map(id => `${origin}/post?id=${encodeURIComponent(id)}`);
-  const urlList = [...postUrls, `${origin}/`, `${origin}/sitemap.xml`];
+  const postUrls = slugs.map((s) => `${origin}/posts/${encodeURIComponent(s)}`);
+  const urlList = [...postUrls, `${origin}/`, `${origin}/posts/`, `${origin}/stats`, `${origin}/about`, `${origin}/sitemap.xml`];
 
   const keyLocation = `${origin}/${key}.txt`;
   const now = new Date().toISOString();
@@ -136,10 +132,10 @@ export async function onRequest(context) {
     status: result?.status ?? null,
     error: result?.error ?? null,
     body: result?.body ?? null,
-    urls: urlList.slice(0, 200) // UIに出すのは上限
+    urls: urlList.slice(0, 200)
   });
 
-  if (result?.ok) {
+  if (kv && result?.ok) {
     await kv.put(doneFlagKey, "1");
   }
 

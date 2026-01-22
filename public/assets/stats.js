@@ -148,12 +148,12 @@ function buildCalendarModel(gameRows) {
 function renderCalendar(model, state, els) {
   const { calWrap, calGrid, calMonth, calPrev, calNext, statsInfo, stateEl } = els;
   if (!model || !model.months?.length) {
-    if (statsInfo) statsInfo.hidden = true;
+    if (statsInfo) hide(statsInfo);
     if (stateEl) {
       stateEl.textContent = "データがありません";
-      stateEl.hidden = false;
+      show(stateEl);
     }
-    if (calWrap) calWrap.hidden = true;
+    hide(calWrap);
     return;
   }
 
@@ -407,6 +407,19 @@ async function main() {
     calModel: null
   };
 
+
+  const show = (el) => {
+    if (!el) return;
+    el.hidden = false;
+    el.style.display = "";
+  };
+
+  const hide = (el) => {
+    if (!el) return;
+    el.hidden = true;
+    el.style.display = "none";
+  };
+
   // 規定値を計算（games.csv の試合数を使う）
   async function ensureQualThresholds() {
     try {
@@ -517,10 +530,6 @@ async function main() {
       btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
     });
 
-    // Functions(SSR)で出している簡易カードは「試合結果」タブだけに出す
-    const ssrCards = document.getElementById("ssrCards");
-    if (ssrCards) ssrCards.hidden = (tab !== "games");
-
     const isCalendar = tab === "calendar";
 
     // 検索欄 / 追加ボタン類
@@ -566,9 +575,9 @@ async function main() {
     try {
       if (showLoading) {
         stateEl.textContent = "読み込み中…";
-        stateEl.hidden = false;
-        wrap.hidden = true;
-        if (calWrap) calWrap.hidden = true;
+        show(stateEl);
+        hide(wrap);
+        hide(calWrap);
       }
 
       // カレンダーは games.csv を読んでカレンダー描画
@@ -576,10 +585,10 @@ async function main() {
         const g = await loadObjects("games");
         state.calModel = buildCalendarModel(g.data);
 
-        stateEl.hidden = true;
-        wrap.hidden = true;
-        if (calWrap) calWrap.hidden = false;
-        if (statsInfo) statsInfo.hidden = true;
+        hide(stateEl);
+        hide(wrap);
+        show(calWrap);
+        if (statsInfo) hide(statsInfo);
 
         renderCalendar(state.calModel, state, calEls);
         return;
@@ -591,17 +600,17 @@ async function main() {
       // extra controls
       syncExtraControls(state.tab, payload.header, payload.data);
 
-      stateEl.hidden = true;
-      wrap.hidden = false;
-      if (calWrap) calWrap.hidden = true;
+      hide(stateEl);
+      show(wrap);
+      hide(calWrap);
 
       renderTable({ key: state.tab, ...payload }, state);
     } catch (e) {
       stateEl.textContent = `読み込み失敗: ${e.message}`;
-      stateEl.hidden = false;
-      wrap.hidden = true;
-      if (calWrap) calWrap.hidden = true;
-      if (statsInfo) statsInfo.hidden = true;
+      show(stateEl);
+      hide(wrap);
+      hide(calWrap);
+      if (statsInfo) hide(statsInfo);
     }
   }
 
