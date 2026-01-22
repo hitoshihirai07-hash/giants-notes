@@ -129,7 +129,7 @@ const Admin = (() => {
 
   // 一覧の管理UI（非表示／削除）
   function renderPostsManage() {
-    const box = document.getElementById("stManage");
+    const box = $("stManage");
     if (!box) return;
 
     box.innerHTML = "";
@@ -195,7 +195,7 @@ const Admin = (() => {
       btnHide.addEventListener("click", () => {
         postsIndex = postsIndex.map(p => (p.slug === it.slug ? { ...p, hidden: !p.hidden } : p));
         renderPostsManage();
-        showStMsg("ok", "一覧を更新しました。必要なら posts.json をダウンロードしてアップロードしてください。");
+        showStMsg("ok", "一覧を更新しました。必要なら posts.json をダウンロードしてアップロードしてください。", 3000);
       });
 
       const btnDel = document.createElement("button");
@@ -207,7 +207,7 @@ const Admin = (() => {
         if (!ok) return;
         postsIndex = postsIndex.filter(p => p.slug !== it.slug);
         renderPostsManage();
-        showStMsg("ok", "一覧から削除しました。必要なら posts.json をダウンロードしてアップロードしてください。");
+        showStMsg("ok", "一覧から削除しました。必要なら posts.json をダウンロードしてアップロードしてください。", 4000);
       });
 
       right.appendChild(btnHide);
@@ -466,10 +466,9 @@ const Admin = (() => {
 
   async function stDownloadIndex() {
     hideStMsg();
-    // 重要：ここで /posts/posts.json を再読込すると、
-    // 「非表示/削除」の操作内容が postsIndex から消えてしまう。
-    // まずは“今画面上にある状態”をそのままダウンロードする。
-    // ただし初回で postsIndex が空のときだけ読み込む。
+    // ここで毎回 loadPostsIndex() すると、管理画面で行った「非表示／削除」の編集内容が
+    // サーバー側の posts.json で上書きされてしまい、ダウンロードが“元に戻る”原因になる。
+    // まだ読み込んでいない（空）場合のみ読み込む。
     if (!Array.isArray(postsIndex) || postsIndex.length === 0) {
       await loadPostsIndex();
     }
