@@ -22,7 +22,7 @@
     <div class="head">
       <div>
         <h1>メモ一覧</h1>
-        <p id="state" class="sub"></p>
+        <p id="state" class="sub">最新メモ（JavaScriptで検索・タグ絞り込み可）</p>
       </div>
       <nav class="nav">
         <a href="/stats">成績・試合結果</a>
@@ -38,68 +38,67 @@
   </header>
 
   <main class="wrap">
-    <!-- JSが動かない環境でも一覧が見えるように、静的に埋め込み（JS起動後は上書き表示） -->
     <div id="list" class="list">
-<div class="card">
-        <a href="/posts/2026-01-23-1123.html"><strong>キャンプの見方メモ：数字より内容</strong></a>
-        <div class="meta"><span>2026-01-23 11:23</span></div>
-        <p class="sub" style="margin-top:10px;">キャンプ・オープン戦で見るのは結果より“内容”。 投手＝ストライク先行・決め球の再現性・四球の出方。 野手＝強い打球・ボール球スイング・走塁判断。 守備＝一歩目・声・ミス後の次プレー。ここが良ければ春の形は作れる。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1120.html"><strong>中継ぎメモ：勝ちパ以外の厚み作り</strong></a>
-        <div class="meta"><span>2026-01-23 11:20</span><span class="tag">中継ぎ</span></div>
-        <p class="sub" style="margin-top:10px;">シーズンは「7回までの橋渡し」で決まる。大勢・R.マルティネスだけに頼らず、中川・船迫・バルドナード・高梨・田中瑛斗あたりで“ゼロで渡せる回”が増えたら理想である。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1118.html"><strong>外野メモ：センターの安定は正義</strong></a>
-        <div class="meta"><span>2026-01-23 11:18</span><span class="tag">外野手</span><span class="tag">センター</span></div>
-        <p class="sub" style="margin-top:10px;">外野は“センターが落ち着くと全体が締まる”と思っている。センター松本剛想定で、両翼の守備・送球も含めて失点を減らす形を作りたい。守れる外野はシーズンを救う。候補選手：キャベッジ・丸・中山・佐々木・浅野あたりで争うと予想される。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1115.html"><strong>二遊間メモ：守備で投手を助ける</strong></a>
-        <div class="meta"><span>2026-01-23 11:15</span><span class="tag">ショート</span><span class="tag">遊撃手</span><span class="tag">セカンド</span><span class="tag">二塁手</span></div>
-        <p class="sub" style="margin-top:10px;">二遊間が固まると投手が一気に楽になる。吉川・門脇・泉口を軸に、石塚や浦田も含めて「誰と誰の組み合わせが一番失点を減らせるか」をキャンプで詰めたいとみている。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1111.html"><strong>捕手メモ：投手陣を生かす起用</strong></a>
-        <div class="meta"><span>2026-01-23 11:11</span><span class="tag">捕手</span><span class="tag">守り</span></div>
-        <p class="sub" style="margin-top:10px;">捕手は「守りの安定」と「終盤の1点」をどう取りに行くか。甲斐・岸田・小林あたりで、投手のタイプ（テンポ重視/変化球中心など）に合わせて最適解を早めに作りたい。 また、若手の山瀬の起用法も気になるところ。あくまでも予想だが大城はファーストや代打メインでピンチの時の捕手に今年もなりそ</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1107.html"><strong>1〜2番メモ：足と出塁で流れを作る</strong></a>
-        <div class="meta"><span>2026-01-23 11:07</span><span class="tag">走塁</span><span class="tag">出塁</span></div>
-        <p class="sub" style="margin-top:10px;">今年の上位は「出て、動かす」が合いそう。四球・内野安打・進塁で相手にストレスをかける形が作れれば、1点の価値が上がる。春先は特にここが効く。岡本がメジャー挑戦のため一番カギになりそうなところ。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1105.html"><strong>キャンプ前：打順候補メモ（現時点の構想）</strong></a>
-        <div class="meta"><span>2026-01-23 11:05</span><span class="tag">キャンプ</span><span class="tag">打順</span></div>
-        <p class="sub" style="margin-top:10px;">“現時点での構想”としては、 1（中）松本剛／2（右）中山礼都／3（三）ダルベック／4（外）キャベッジ／5（一）リチャード／6（遊）泉口友汰／7（捕）岸田行倫／8（二）吉川尚輝、みたいな並びが報じられている。キャンプで入れ替わるのは前提だけど、方向性のメモとして残しておく。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1103.html"><strong>キャンプ前：先発ローテ候補メモ（現時点）</strong></a>
-        <div class="meta"><span>2026-01-23 11:03</span><span class="tag">キャンプ</span><span class="tag">ローテーション</span></div>
-        <p class="sub" style="margin-top:10px;">現時点のローテは「軸＋競争」で見る。軸は山﨑伊織。 残り枠は、戸郷翔征／則本昂大／田中将大／赤星優志／井上温大／西舘勇陽／横川凱／森田駿哉／竹丸和幸あたりの勝負。 外国人のウィットリー／ハワード／マタがハマれば厚みが増える。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-23-1059.html"><strong>キャンプ前メモ：今年のテーマ（まず土台）</strong></a>
-        <div class="meta"><span>2026-01-23 10:59</span><span class="tag">キャンプ</span></div>
-        <p class="sub" style="margin-top:10px;">キャンプ前の時点で一番大事なのは「土台」。守備で余計な失点を減らして、投手がストレスなく投げられる形を作りたい。派手さより“当たり前を落とさない”チームが春先は強い。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-21-2149.html"><strong>2026年シーズンの期待</strong></a>
-        <div class="meta"><span>2026-01-21 21:49</span><span class="tag">2026</span><span class="tag">キャンプ</span><span class="tag">補強</span><span class="tag">読売ジャイアンツ</span></div>
-        <p class="sub" style="margin-top:10px;">岡本和真選手がポスティングでトロント・ブルージェイズへ移籍し、打線は新しい形を作っていくシーズンになりそうです。まずは挑戦を素直に応援しつつ、チームとしては「誰か一人で埋める」ではなく、得点の形を全員で分担していけると強いと思っています。</p>
-      </div>
-<div class="card">
-        <a href="/posts/2026-01-21-2144.html"><strong>はじめまして（最初のメモ）</strong></a>
-        <div class="meta"><span>2026-01-21 21:44</span><span class="tag">はじめまして</span><span class="tag">読売ジャイアンツ</span><span class="tag">小林誠司</span><span class="tag">高橋由伸</span></div>
-        <p class="sub" style="margin-top:10px;">はじめまして。ここでは読売ジャイアンツの試合を見て、「良かった」と思ったところだけを短くメモしていきます。 勝ち負けに関係なく、良いプレーや良い流れ、いい雰囲気を見つけたら残します。</p>
-      </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1123.html"><strong>キャンプの見方メモ：数字より内容</strong></a>
+      <div class="meta"><span>2026-01-23 11:23</span></div>
+      <p class="sub" style="margin-top:10px;">キャンプ・オープン戦で見るのは結果より“内容”。 投手＝ストライク先行・決め球の再現性・四球の出方。 野手＝強い打球・ボール球スイング・走塁判断。 守備＝一歩目・声・ミス後の次プレー。ここが良ければ春の形は作れる。</p>
     </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1120.html"><strong>中継ぎメモ：勝ちパ以外の厚み作り</strong></a>
+      <div class="meta"><span>2026-01-23 11:20</span><span class="tag">中継ぎ</span></div>
+      <p class="sub" style="margin-top:10px;">シーズンは「7回までの橋渡し」で決まる。大勢・R.マルティネスだけに頼らず、中川・船迫・バルドナード・高梨・田中瑛斗あたりで“ゼロで渡せる回”が増えたら理想である。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1118.html"><strong>外野メモ：センターの安定は正義</strong></a>
+      <div class="meta"><span>2026-01-23 11:18</span><span class="tag">外野手</span><span class="tag">センター</span></div>
+      <p class="sub" style="margin-top:10px;">外野は“センターが落ち着くと全体が締まる”と思っている。センター松本剛想定で、両翼の守備・送球も含めて失点を減らす形を作りたい。守れる外野はシーズンを救う。候補選手：キャベッジ・丸・中山・佐々木・浅野あたりで争うと予想される。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1115.html"><strong>二遊間メモ：守備で投手を助ける</strong></a>
+      <div class="meta"><span>2026-01-23 11:15</span><span class="tag">ショート</span><span class="tag">遊撃手</span><span class="tag">セカンド</span><span class="tag">二塁手</span></div>
+      <p class="sub" style="margin-top:10px;">二遊間が固まると投手が一気に楽になる。吉川・門脇・泉口を軸に、石塚や浦田も含めて「誰と誰の組み合わせが一番失点を減らせるか」をキャンプで詰めたいとみている。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1111.html"><strong>捕手メモ：投手陣を生かす起用</strong></a>
+      <div class="meta"><span>2026-01-23 11:11</span><span class="tag">捕手</span><span class="tag">守り</span></div>
+      <p class="sub" style="margin-top:10px;">捕手は「守りの安定」と「終盤の1点」をどう取りに行くか。甲斐・岸田・小林あたりで、投手のタイプ（テンポ重視/変化球中心など）に合わせて最適解を早めに作りたい。 また、若手の山瀬の起用法も気になるところ。あくまでも予想だが大城はファーストや代打メインでピンチの時の捕手に今年もなりそ</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1107.html"><strong>1〜2番メモ：足と出塁で流れを作る</strong></a>
+      <div class="meta"><span>2026-01-23 11:07</span><span class="tag">走塁</span><span class="tag">出塁</span></div>
+      <p class="sub" style="margin-top:10px;">今年の上位は「出て、動かす」が合いそう。四球・内野安打・進塁で相手にストレスをかける形が作れれば、1点の価値が上がる。春先は特にここが効く。岡本がメジャー挑戦のため一番カギになりそうなところ。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1105.html"><strong>キャンプ前：打順候補メモ（現時点の構想）</strong></a>
+      <div class="meta"><span>2026-01-23 11:05</span><span class="tag">キャンプ</span><span class="tag">打順</span></div>
+      <p class="sub" style="margin-top:10px;">“現時点での構想”としては、 1（中）松本剛／2（右）中山礼都／3（三）ダルベック／4（外）キャベッジ／5（一）リチャード／6（遊）泉口友汰／7（捕）岸田行倫／8（二）吉川尚輝、みたいな並びが報じられている。キャンプで入れ替わるのは前提だけど、方向性のメモとして残しておく。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1103.html"><strong>キャンプ前：先発ローテ候補メモ（現時点）</strong></a>
+      <div class="meta"><span>2026-01-23 11:03</span><span class="tag">キャンプ</span><span class="tag">ローテーション</span></div>
+      <p class="sub" style="margin-top:10px;">現時点のローテは「軸＋競争」で見る。軸は山﨑伊織。 残り枠は、戸郷翔征／則本昂大／田中将大／赤星優志／井上温大／西舘勇陽／横川凱／森田駿哉／竹丸和幸あたりの勝負。 外国人のウィットリー／ハワード／マタがハマれば厚みが増える。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-23-1059.html"><strong>キャンプ前メモ：今年のテーマ（まず土台）</strong></a>
+      <div class="meta"><span>2026-01-23 10:59</span><span class="tag">キャンプ</span></div>
+      <p class="sub" style="margin-top:10px;">キャンプ前の時点で一番大事なのは「土台」。守備で余計な失点を減らして、投手がストレスなく投げられる形を作りたい。派手さより“当たり前を落とさない”チームが春先は強い。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-21-2149.html"><strong>2026年シーズンの期待</strong></a>
+      <div class="meta"><span>2026-01-21 21:49</span><span class="tag">2026</span><span class="tag">キャンプ</span><span class="tag">補強</span><span class="tag">読売ジャイアンツ</span></div>
+      <p class="sub" style="margin-top:10px;">岡本和真選手がポスティングでトロント・ブルージェイズへ移籍し、打線は新しい形を作っていくシーズンになりそうです。まずは挑戦を素直に応援しつつ、チームとしては「誰か一人で埋める」ではなく、得点の形を全員で分担していけると強いと思っています。</p>
+    </div>
+    <div class="card">
+      <a href="/posts/2026-01-21-2144.html"><strong>はじめまして（最初のメモ）</strong></a>
+      <div class="meta"><span>2026-01-21 21:44</span><span class="tag">はじめまして</span><span class="tag">読売ジャイアンツ</span><span class="tag">小林誠司</span><span class="tag">高橋由伸</span></div>
+      <p class="sub" style="margin-top:10px;">はじめまして。ここでは読売ジャイアンツの試合を見て、「良かった」と思ったところだけを短くメモしていきます。 勝ち負けに関係なく、良いプレーや良い流れ、いい雰囲気を見つけたら残します。</p>
+    </div>
+  </div>
     <noscript><p class="hint">※検索やタグの絞り込みは JavaScript が必要です。</p></noscript>
   </main>
 
-  <footer class="wrap foot">
+    <footer class="wrap foot">
     <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
   </footer>
 
