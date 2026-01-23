@@ -466,9 +466,9 @@ const Admin = (() => {
 
   async function stDownloadIndex() {
     hideStMsg();
-    // ここで毎回 loadPostsIndex() すると、管理画面で行った「非表示／削除」の編集内容が
-    // サーバー側の posts.json で上書きされてしまい、ダウンロードが“元に戻る”原因になる。
-    // まだ読み込んでいない（空）場合のみ読み込む。
+    // ここで常に loadPostsIndex() すると、
+    // 直前に非表示/削除した内容が「元のposts.json」で上書きされてしまう。
+    // 初回で postsIndex が空のときだけ読み込む。
     if (!Array.isArray(postsIndex) || postsIndex.length === 0) {
       await loadPostsIndex();
     }

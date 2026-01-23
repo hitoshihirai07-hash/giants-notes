@@ -2,9 +2,11 @@
   "version": 1,
   "include": [
     "/api*",
-    "/posts",
-    "/posts/",
-    "/sitemap.xml"
+    "/sitemap.xml",
+    "/posts*"
   ],
-  "exclude": []
+  "exclude": [
+    "/posts/*.html",
+    "/posts/posts.json"
+  ]
 }
