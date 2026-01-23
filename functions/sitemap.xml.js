@@ -53,6 +53,9 @@ export async function onRequest(context) {
     urls.push({ loc: `${origin}/posts/`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/stats`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/contact`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/policy`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/disclaimer`, lastmod: topLastmod });
 
     for (const p of visiblePosts) {
       const slug = String(p?.slug || "").trim();
