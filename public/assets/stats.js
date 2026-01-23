@@ -571,10 +571,12 @@ async function main() {
     await refresh(false);
   });
 
+  const LOADING_HTML = `※このページは JavaScript で成績データを読み込み表示します。開幕前などはデータが空の場合があります。<br>出典：<a href="https://npb.jp/" target="_blank" rel="noopener nofollow">NPB公式サイト</a>`;
+
   async function refresh(showLoading = true) {
     try {
       if (showLoading) {
-        stateEl.textContent = "読み込み中…";
+        stateEl.innerHTML = LOADING_HTML;
         show(stateEl);
         hide(wrap);
         hide(calWrap);
