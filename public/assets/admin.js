@@ -129,7 +129,7 @@ const Admin = (() => {
 
   // 一覧の管理UI（非表示／削除）
   function renderPostsManage() {
-    const box = id("stManage");
+    const box = $("stManage");
     if (!box) return;
 
     box.innerHTML = "";
@@ -466,7 +466,11 @@ const Admin = (() => {
 
   async function stDownloadIndex() {
     hideStMsg();
-    await loadPostsIndex();
+    // すでに管理画面上で編集している場合は、ここで再読込すると変更が消える。
+    // 初回で postsIndex が空のときだけ読み込む。
+    if (!Array.isArray(postsIndex) || postsIndex.length === 0) {
+      await loadPostsIndex();
+    }
 
     // 並びを揃える（新しい順）
     postsIndex = (Array.isArray(postsIndex) ? postsIndex : []).slice().sort((a, b) =>
