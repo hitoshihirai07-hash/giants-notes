@@ -3,10 +3,11 @@
   "include": [
     "/api*",
     "/sitemap.xml",
+    "/stats*",
     "/posts*"
   ],
   "exclude": [
-    "/posts/*.html",
-    "/posts/posts.json"
+    "/posts/posts.json",
+    "/posts/*.html"
   ]
 }

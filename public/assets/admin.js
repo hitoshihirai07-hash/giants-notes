@@ -129,7 +129,7 @@ const Admin = (() => {
 
   // 一覧の管理UI（非表示／削除）
   function renderPostsManage() {
-    const box = $("stManage");
+    const box = id("stManage");
     if (!box) return;
 
     box.innerHTML = "";
@@ -466,12 +466,7 @@ const Admin = (() => {
 
   async function stDownloadIndex() {
     hideStMsg();
-    // ここで常に loadPostsIndex() すると、
-    // 直前に非表示/削除した内容が「元のposts.json」で上書きされてしまう。
-    // 初回で postsIndex が空のときだけ読み込む。
-    if (!Array.isArray(postsIndex) || postsIndex.length === 0) {
-      await loadPostsIndex();
-    }
+    await loadPostsIndex();
 
     // 並びを揃える（新しい順）
     postsIndex = (Array.isArray(postsIndex) ? postsIndex : []).slice().sort((a, b) =>
