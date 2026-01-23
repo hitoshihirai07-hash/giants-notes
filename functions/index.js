@@ -136,8 +136,8 @@ export async function onRequest({ env, request }){
     <div id="list" class="list">${listHtml}</div>
   </main>
 
-  <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a></small>
+    <footer class="wrap foot">
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
   </footer>
 
   <script src="/assets/app.js"></script>

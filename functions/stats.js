@@ -140,7 +140,7 @@ export async function onRequestGet(context){
     <div class="head">
       <h1>成績・試合結果</h1>
       <nav class="nav">
-        <a href="/">メモ一覧</a>
+        <a href="/posts/">メモ一覧</a>
         <a href="/about">このサイトについて</a>
       </nav>
     </div>
@@ -182,6 +182,11 @@ export async function onRequestGet(context){
       </section>
     </div>
 
+
+    <div class="sub" style="margin-top:10px">
+      ※開幕前／データ未取得の時期は「該当データがありません」と表示されます。詳細は <a href="https://npb.jp/" target="_blank" rel="nofollow noopener">NPB公式</a> もご確認ください。
+    </div>
+
     <div id="statsState" class="state" hidden></div>
 
     <div id="tableWrap" class="card tableScroll" hidden>
@@ -200,8 +205,8 @@ export async function onRequestGet(context){
     </div>
   </main>
 
-  <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a></small>
+    <footer class="wrap foot">
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
   </footer>
 
   <script type="module" src="/assets/stats.js"></script>
