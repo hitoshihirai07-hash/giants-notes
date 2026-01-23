@@ -265,8 +265,8 @@ const Admin = (() => {
     <article class=\"article\">${ps}</article>
   </main>
 
-  <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
+  <footer class=\"wrap foot\">
+    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href=\"/about\">このサイトについて</a> ・ <a href=\"/contact\">お問い合わせ</a> ・ <a href=\"/policy\">プライバシーポリシー</a> ・ <a href=\"/disclaimer\">免責事項</a></small>
   </footer>
 </body>
 </html>`;
@@ -360,7 +360,7 @@ const Admin = (() => {
   </main>
 
   <footer class="wrap foot">
-    <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
+    <small>© 読売ジャイアンツ 良かったところメモ</small>
   </footer>
 
   <script>
