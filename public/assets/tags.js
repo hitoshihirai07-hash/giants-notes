@@ -22,7 +22,11 @@
 
   // タグ一覧の開閉（選択中は折りたたむ）
   function setTagListVisible(visible) {
-    tagListEl.hidden = !visible;
+    const hide = !visible;
+    tagListEl.hidden = hide;
+    tagListEl.classList.toggle("is-hidden", hide);
+    // hidden属性が何らかのCSSで無効化されても確実に消えるように style も併用
+    tagListEl.style.display = hide ? "none" : "";
   }
 
   function toggleTagList() {
@@ -190,6 +194,7 @@
   async function main() {
     try {
       stateEl.textContent = "読み込み中…";
+      if (picked) setTagListVisible(false);
       const posts = await loadPosts();
       const tagMap = buildTagMap(posts);
       const sorted = sortTags(tagMap);

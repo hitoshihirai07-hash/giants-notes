@@ -17,6 +17,16 @@
 
   <link rel="stylesheet" href="/assets/style.css" />
   <script src="/assets/seo.js" defer></script>
+  <style>
+    #tagList.is-hidden{display:none !important;}
+    html.picked-tag #tagList{display:none !important;}
+  </style>
+  <script>
+    (()=>{try{
+      const p=new URLSearchParams(location.search).get("tag");
+      if(p && String(p).trim()) document.documentElement.classList.add("picked-tag");
+    }catch(e){}})();
+  </script>
 </head>
 <body>
   <header class="wrap">
