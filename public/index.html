@@ -47,12 +47,94 @@
     </div>
 
     <div class="card" style="margin-top:12px;">
-      <p style="margin:0;">最新のメモは <a href="/posts/">メモ一覧</a> からどうぞ。タグから探す場合は <a href="/tags">タグ一覧</a> へ。</p>
+      <h2 class="h2" style="margin:0 0 10px;">最新3件</h2>
+      <div id="latestPosts" class="list" style="margin-top:8px;"></div>
+      <p class="hint" style="margin:10px 0 0;">もっと見る → <a href="/posts/">メモ一覧</a> ／ タグから探す → <a href="/tags">タグ一覧</a></p>
     </div>
   </main>
 
     <footer class="wrap foot">
     <small>© 読売ジャイアンツ 良かったところメモ ・ <a href="/about">このサイトについて</a> ・ <a href="/contact">お問い合わせ</a> ・ <a href="/policy">プライバシーポリシー</a> ・ <a href="/disclaimer">免責事項</a></small>
   </footer>
+
+<script>
+(() => {
+  const container = document.getElementById('latestPosts');
+  if (!container) return;
+
+  const trim = (s, n) => {
+    const str = String(s || '');
+    return str.length > n ? (str.slice(0, n) + '…') : str;
+  };
+
+  const render = (posts) => {
+    container.innerHTML = '';
+    const top = Array.isArray(posts) ? posts.slice(0, 3) : [];
+
+    if (!top.length) {
+      const empty = document.createElement('div');
+      empty.className = 'meta';
+      empty.textContent = 'まだメモがありません。';
+      container.appendChild(empty);
+      return;
+    }
+
+    top.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const a = document.createElement('a');
+      a.href = '/posts/' + (p.slug || '');
+      const strong = document.createElement('strong');
+      strong.textContent = p.title || '';
+      a.appendChild(strong);
+      card.appendChild(a);
+
+      if (p.datetime) {
+        const dt = document.createElement('div');
+        dt.className = 'meta';
+        dt.innerHTML = '<span></span>';
+        dt.querySelector('span').textContent = p.datetime;
+        card.appendChild(dt);
+      }
+
+      if (Array.isArray(p.tags) && p.tags.length) {
+        const tags = document.createElement('div');
+        tags.className = 'tags';
+        p.tags.slice(0, 4).forEach(t => {
+          const s = document.createElement('span');
+          s.className = 'tag';
+          s.textContent = t;
+          tags.appendChild(s);
+        });
+        card.appendChild(tags);
+      }
+
+      if (p.excerpt) {
+        const ex = document.createElement('div');
+        ex.className = 'meta';
+        ex.style.marginTop = '6px';
+        ex.style.lineHeight = '1.4';
+        ex.textContent = trim(p.excerpt, 90);
+        card.appendChild(ex);
+      }
+
+      container.appendChild(card);
+    });
+  };
+
+  fetch('/posts/posts.json', { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('fetch failed')))
+    .then(render)
+    .catch(() => {
+      container.innerHTML = '';
+      const err = document.createElement('div');
+      err.className = 'meta';
+      err.textContent = '最新メモの読み込みに失敗しました。';
+      container.appendChild(err);
+    });
+})();
+</script>
+
 </body>
 </html>
