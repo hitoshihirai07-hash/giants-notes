@@ -25,6 +25,7 @@
         <p id="state" class="sub">最新メモ（JavaScriptで検索・タグ絞り込み可）</p>
       </div>
       <nav class="nav">
+        <a href="/tags">タグ一覧</a>
         <a href="/stats">成績・試合結果</a>
         <a href="/about">このサイトについて</a>
         <a href="/contact">お問い合わせ</a>
@@ -33,6 +34,9 @@
 
     <div class="controls">
       <input id="q" class="input full" placeholder="検索（タイトル・タグ・本文抜粋）" />
+      <div class="row" style="margin:0; width:100%;">
+        <a class="btn" href="/tags" style="text-decoration:none;">タグ一覧を見る</a>
+      </div>
       <div id="tags" class="row" style="gap:8px;"></div>
     </div>
   </header>

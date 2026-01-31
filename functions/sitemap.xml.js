@@ -51,6 +51,7 @@ export async function onRequest(context) {
     const urls = [];
     urls.push({ loc: `${origin}/`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/posts/`, lastmod: topLastmod });
+    urls.push({ loc: `${origin}/tags/`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/stats`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/about`, lastmod: topLastmod });
     urls.push({ loc: `${origin}/contact`, lastmod: topLastmod });
