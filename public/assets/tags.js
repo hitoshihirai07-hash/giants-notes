@@ -20,6 +20,21 @@
   // 特殊タグ（タグなし）
   const NONE = "__none__";
 
+  // タグ一覧の開閉（選択中は折りたたむ）
+  function setTagListVisible(visible) {
+    tagListEl.hidden = !visible;
+  }
+
+  function toggleTagList() {
+    setTagListVisible(tagListEl.hidden);
+    if (!tagListEl.hidden) {
+      // タグ一覧を開いたら見える位置へ
+      requestAnimationFrame(() => {
+        tagListEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }
+
   function normTag(t) {
     return String(t ?? "").trim();
   }
@@ -124,10 +139,17 @@
           <div class="meta" style="margin-top:0;"><span>選択中</span></div>
           <div style="font-size:18px; font-weight:700; margin-top:4px;">${esc(label)} <span class="tag">${esc(fmtCount(count))}</span></div>
         </div>
-        <a class="btn" href="${clearUrl}" style="text-decoration:none;">タグを外す</a>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" id="toggleTags" type="button">別のタグを選ぶ</button>
+          <a class="btn" href="${clearUrl}" style="text-decoration:none;">タグを外す</a>
+        </div>
       </div>
     `.trim();
     pickedEl.hidden = false;
+
+    // 別のタグを選ぶ
+    const btn = document.getElementById("toggleTags");
+    if (btn) btn.addEventListener("click", toggleTagList);
   }
 
   function renderTagList(tagEntries) {
@@ -143,6 +165,7 @@
     if (!picked) {
       pickedEl.hidden = true;
       postsWrapEl.hidden = true;
+      setTagListVisible(true);
       stateEl.textContent = "タグを選ぶと、そのタグのメモだけ一覧表示します。";
       return;
     }
@@ -159,6 +182,9 @@
 
     stateEl.textContent = `タグ「${pickLabel(picked)}」のメモ一覧です。`;
     renderPosts(filtered);
+
+    // タグ選択中は、一覧を折りたたんで投稿一覧を近くに
+    setTagListVisible(false);
   }
 
   async function main() {
@@ -176,6 +202,13 @@
       tagQEl.addEventListener("input", () => {
         const q = tagQEl.value;
         renderTagList(filterTags(sorted, q));
+
+        // 検索している間はタグ一覧を見えるようにする
+        if (String(q || "").trim()) {
+          setTagListVisible(true);
+        } else if (picked) {
+          setTagListVisible(false);
+        }
       });
 
       stateEl.textContent = picked
