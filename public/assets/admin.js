@@ -245,6 +245,7 @@ const Admin = (() => {
   <meta name=\"robots\" content=\"index,follow\" />
   <link rel=\"stylesheet\" href=\"/assets/style.css\" />
   <script src=\"/assets/seo.js\" defer></script>
+  <script src=\"/assets/post-nav.js\" defer></script>
 </head>
 <body>
   <header class=\"wrap\">

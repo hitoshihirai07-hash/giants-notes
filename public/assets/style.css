@@ -126,3 +126,9 @@ h1 { margin: 6px 0 8px; font-size: 22px; }
 .input.full{ flex: 1; }
 .textarea{ min-height: 160px; resize: vertical; }
 .hp{ position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }
+
+
+/* postnav */
+.postnav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:14px;}
+.postnav .btn{flex:1;min-width:140px;text-align:center;text-decoration:none;}
+.btn.disabled{opacity:0.45;cursor:default;pointer-events:none;}
